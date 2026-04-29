@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BancoDeTalentos.API/BancoDeTalentos.API.csproj" />
+  <Project Path="BancoDeTalentos.Application/BancoDeTalentos.Application.csproj" />
+  <Project Path="BancoDeTalentos.Core/BancoDeTalentos.Core.csproj" />
+  <Project Path="BancoDeTalentos.Infrastructure/BancoDeTalentos.Infrastructure.csproj" />
+</Solution>
