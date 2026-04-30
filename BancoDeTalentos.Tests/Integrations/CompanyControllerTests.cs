@@ -1,7 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Json;
-using BancoDeTalentos.API;
 using BancoDeTalentos.Application.Model;
 using Bogus;
 using Bogus.Extensions.Brazil;
