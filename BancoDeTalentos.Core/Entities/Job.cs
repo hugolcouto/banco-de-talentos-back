@@ -16,7 +16,7 @@ public class Job : BaseEntity
         int myProperty,
         DateTime dueDate,
         int openedVacancies,
-        Guid hirerId
+        int hirerId
     ) : base()
     {
         Title = title;
@@ -46,5 +46,5 @@ public class Job : BaseEntity
     public int MyProperty { get; private set; }
     public DateTime DueDate { get; private set; }
     public int OpenedVacancies { get; private set; }
-    public Guid HirerId { get; private set; }
+    public int HirerId { get; private set; }
 }

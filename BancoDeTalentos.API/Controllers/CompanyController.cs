@@ -1,19 +1,32 @@
+using BancoDeTalentos.Application.Interfaces;
+using BancoDeTalentos.Application.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BancoDeTalentos.API.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/empresa")]
 [ApiController]
 public class CompanyController : ControllerBase
 {
+    private readonly ICompanyService _companyService;
+
+    public CompanyController(ICompanyService companyService)
+    {
+        _companyService = companyService;
+    }
+
     // create
     [HttpPost]
-    public IActionResult Create()
+    public IActionResult Create(CreateCompanyModel model)
     {
-        
-        
-        return Ok();
+        ResultViewModel<CompanyViewModel> companyResult = _companyService.CreateCompany(model);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = companyResult.Data?.Id },
+            companyResult
+        );
     }
 
     // read

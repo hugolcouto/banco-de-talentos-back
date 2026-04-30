@@ -10,8 +10,7 @@ public class Company : BaseEntity
         string document,
         string telephone,
         string email,
-        string password,
-        string about
+        string password
     ) : base()
     {
         Name = name;
@@ -19,8 +18,8 @@ public class Company : BaseEntity
         Telephone = telephone;
         Email = email;
         Password = password;
-        About = about;
 
+        About = "";
         Jobs = new List<Job>();
     }
 

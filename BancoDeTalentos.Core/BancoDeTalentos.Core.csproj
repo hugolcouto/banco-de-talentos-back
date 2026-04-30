@@ -7,10 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces/Candidate/" />
-    <Folder Include="Interfaces/Company/" />
+    <Folder Include="Interfaces/" />
     <Folder Include="ValueObjects/" />
     <Folder Include="ValueObjects/Resume/" />
   </ItemGroup>
+<!-- 
+  <ItemGroup>
+    <ProjectReference Include="../BancoDeTalentos.Application/BancoDeTalentos.Application.csproj" />
+  </ItemGroup> -->
 
 </Project>

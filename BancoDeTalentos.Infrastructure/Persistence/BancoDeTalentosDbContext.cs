@@ -20,4 +20,13 @@ public class BancoDeTalentosDbContext : DbContext
 
     // Backoffice
     public DbSet<Backoffice> Backoffice { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Company>(
+            e => e.HasKey(c => c.Id)
+        );
+
+        base.OnModelCreating(modelBuilder);
+    }
 }

@@ -14,12 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../BancoDeTalentos.Application/BancoDeTalentos.Application.csproj" />
     <ProjectReference Include="../BancoDeTalentos.Infrastructure/BancoDeTalentos.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers/Candidate/" />
-    <Folder Include="Controllers/Company/" />
   </ItemGroup>
 
 </Project>

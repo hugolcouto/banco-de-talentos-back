@@ -1,4 +1,6 @@
-﻿using BancoDeTalentos.Infrastructure.Persistence;
+﻿using BancoDeTalentos.Core.Interfaces;
+using BancoDeTalentos.Infrastructure.Persistence;
+using BancoDeTalentos.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +13,7 @@ public static class InfrastructureModule
         this IServiceCollection services, IConfiguration configuration)
     {
         services
+            .AddRepositories()
             .AddData(configuration);
 
         return services;
@@ -29,6 +32,13 @@ public static class InfrastructureModule
         // services.AddDbContext<BancoDeTalentosDbContext>(
         //     o => o.UseSqlServer(dbConnectionString)
         // );
+
+        return services;
+    }
+
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
 
         return services;
     }
