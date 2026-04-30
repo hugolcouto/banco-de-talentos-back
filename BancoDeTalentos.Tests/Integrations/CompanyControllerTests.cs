@@ -20,10 +20,11 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
     {
         Faker faker = new Faker("pt_BR");
 
-        for (int i = 0; i <= 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             yield return new object[]
             {
+                // Dados de criação
                 new
                 {
                     name = faker.Company.CompanyName(),
@@ -31,6 +32,14 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
                     telephone = faker.Phone.PhoneNumber(),
                     email = faker.Internet.Email(),
                     password = faker.Random.Hash()
+                },
+
+                // Dados de atualização
+                new
+                {
+                    name = faker.Company.CompanyName(),
+                    telephone = faker.Phone.PhoneNumber(),
+                    email = faker.Internet.Email(),
                 }
             };
         }
@@ -38,7 +47,7 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
 
     [Theory]
     [MemberData(nameof(GetCompanyTestData))]
-    public async Task Company_Flow_Should_Work_Correctly(Object newCompanyPayload)
+    public async Task Company_Flow_Should_Work_Correctly(Object newCompanyPayload, Object updatePayload)
     {
 
         // Etapa 1 - Criar empresas
@@ -46,7 +55,8 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
             .PostAsJsonAsync("/api/empresa", newCompanyPayload);
 
         Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
-        var postResult = await postResponse
+
+        ResultViewModel<CompanyViewModel?>? postResult = await postResponse
             .Content
             .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
 
@@ -58,11 +68,11 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
         Assert.True(companyId > 0);
 
         // Etapa 2 - Buscar empresa por ID
-        var getResponse = await _client.GetAsync($"/api/empresa/{companyId}");
+        HttpResponseMessage? getResponse = await _client.GetAsync($"/api/empresa/{companyId}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
 
-        var getResult = await getResponse
+        ResultViewModel<CompanyViewModel?>? getResult = await getResponse
             .Content
             .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
 
@@ -71,7 +81,23 @@ public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal((string)payload.name, getResult?.Data.Name);
 
         // Etapa 3 - Listar todas as empresas
-        var listResponse = await _client.GetAsync("/api/empresa");
+        HttpResponseMessage? listResponse = await _client.GetAsync("/api/empresa");
+
         Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+
+        // Etapa 4 - Atualizar empresa
+        HttpResponseMessage updateResponse = await _client
+            .PatchAsJsonAsync($"/api/empresa/{companyId}", updatePayload);
+
+        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+
+        // Etapa 5 - Deletar empresa
+        HttpResponseMessage? deleteResponse = await _client.DeleteAsync($"/api/empresa/{companyId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+        HttpResponseMessage tryGetDeleted = await _client.GetAsync($"/api/empresa/{companyId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, tryGetDeleted.StatusCode);
     }
 }

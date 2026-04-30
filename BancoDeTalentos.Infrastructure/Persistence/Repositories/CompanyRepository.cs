@@ -1,5 +1,6 @@
 using BancoDeTalentos.Core.Entities;
 using BancoDeTalentos.Core.Interfaces;
+using Microsoft.Identity.Client;
 
 namespace BancoDeTalentos.Infrastructure.Persistence.Repositories;
 
@@ -33,5 +34,17 @@ public class CompanyRepository : ICompanyRepository
         Company? company = _context.Company.FirstOrDefault(c => c.Id == id)!;
 
         return company;
+    }
+
+    public void UpdateCompany(Company company)
+    {
+        _context.Company.Update(company);
+        _context.SaveChanges();
+    }
+
+    public void DeleteCompany(Company company)
+    {
+        _context.Company.Update(company);
+        _context.SaveChanges();
     }
 }

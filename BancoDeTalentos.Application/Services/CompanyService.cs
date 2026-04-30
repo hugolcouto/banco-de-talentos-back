@@ -29,6 +29,8 @@ public class CompanyService : ICompanyService
         return ResultViewModel<CompanyViewModel>.Success(viewModel!);
     }
 
+
+
     public ResultViewModel<List<CompanyViewModel>> GetCompanies()
     {
         List<Company>? companies = _companyRepository.GetCompanies();
@@ -49,5 +51,29 @@ public class CompanyService : ICompanyService
         return ResultViewModel<CompanyViewModel>.Success(
             CompanyViewModel.FromEntity(company)!
         );
+    }
+
+    public ResultViewModel UpdateCompany(int id, UpdateCompanyModel model)
+    {
+        Company? company = _companyRepository.GetCompanyById(id);
+
+        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+
+        _companyRepository.UpdateCompany(company!);
+
+        return ResultViewModel.Sucess();
+    }
+
+    public ResultViewModel DeleteCompany(int id)
+    {
+        Company? company = _companyRepository.GetCompanyById(id);
+
+        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+
+        company!.SetAsDeleted();
+
+        _companyRepository.DeleteCompany(company);
+
+        return ResultViewModel.Sucess();
     }
 }

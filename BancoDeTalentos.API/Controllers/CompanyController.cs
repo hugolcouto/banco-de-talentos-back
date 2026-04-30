@@ -48,8 +48,10 @@ public class CompanyController : ControllerBase
 
     // update
     [HttpPatch("{id}")]
-    public IActionResult Update(int id)
+    public IActionResult Update(int id, UpdateCompanyModel model)
     {
+        _companyService.UpdateCompany(id, model);
+
         return Ok();
     }
 
@@ -57,7 +59,9 @@ public class CompanyController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        return Ok();
+        _companyService.DeleteCompany(id);
+
+        return NoContent();
     }
 }
 
