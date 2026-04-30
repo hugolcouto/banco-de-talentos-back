@@ -1,3 +1,5 @@
+# <p><a href="README.md"><button>⬅ Voltar ao índice</button></a></p>
+
 # 10. Fluxo de Dados Completo
 
 ## 🎯 O Grande Mapa: Uma Requisição HTTP Completa
@@ -60,6 +62,8 @@ CreateCompanyModel model = new CreateCompanyModel
 
 ---
 
+}
+
 ### Passo 2️⃣: Controller Intercepta
 
 ```csharp
@@ -82,6 +86,10 @@ public class CompanyController : ControllerBase
         Console.WriteLine($"Recebido: {model.Name}");  // "Acme Corporation"
 
         // Passo 3: Delega para Service
+    - Logging: registrar entrada/saída nas camadas Service e Repository com correlação por `requestId`.
+    - Métricas: tempo de execução do Service, contagem de chamadas `Update`/`Delete`.
+    - Telemetria: capturar exceções e dependências (DB) para diagnósticos.
+
         ResultViewModel<CompanyViewModel> companyResult =
             _companyService.CreateCompany(model);
 

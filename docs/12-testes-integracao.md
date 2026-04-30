@@ -1,3 +1,7 @@
+# <p><a href="README.md"><button>⬅ Voltar ao índice</button></a></p>
+
+# 12. Testes de Integração
+
 # 12. Testes de Integração
 
 ## 💡 O que são Testes de Integração?
@@ -7,6 +11,111 @@
 ```
 Controller → Service → Repository → Database → Response
 ```
+
+---
+
+## 🧪 Testes de Integração: Atualização e Deleção de `Company`
+
+Nesta seção há exemplos e recomendações específicas para `Update` e `Delete` de `Company`.
+
+### Teste: Atualizar Empresa (Update)
+
+Objetivos do teste:
+
+- Validar que `PATCH /api/empresa/{id}` retorna `200 OK`.
+- Confirmar que os dados foram efetivamente persistidos no banco.
+
+Exemplo (xUnit + WebApplicationFactory):
+
+```csharp
+[Fact]
+public async Task Update_Company_IntegrationTest()
+{
+    // Arrange: criar empresa
+    var newCompany = new
+    {
+        name = "CompanyToUpdate",
+        document = _faker.Company.Cnpj(),
+        telephone = _faker.Phone.PhoneNumber(),
+        email = _faker.Internet.Email(),
+        password = _faker.Random.Hash()
+    };
+
+    var createResponse = await _client.PostAsJsonAsync("/api/empresa", newCompany);
+    var created = await createResponse.Content.ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
+    int id = created!.Data!.Id;
+
+    // Act: patch
+    var updatePayload = new { name = "Updated Name" };
+    var patchResponse = await _client.PatchAsJsonAsync($"/api/empresa/{id}", updatePayload);
+
+    // Assert: status e persistência
+    Assert.Equal(HttpStatusCode.OK, patchResponse.StatusCode);
+
+    var getResponse = await _client.GetAsync($"/api/empresa/{id}");
+    var getResult = await getResponse.Content.ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
+    Assert.Equal("Updated Name", getResult!.Data!.Name);
+}
+```
+
+### Teste: Deletar Empresa (Delete)
+
+Objetivos do teste:
+
+- Confirmar que `DELETE /api/empresa/{id}` retorna `204 No Content`.
+- Garantir que `GET /api/empresa/{id}` após a deleção retorne `404 Not Found`.
+
+```csharp
+[Fact]
+public async Task Delete_Company_IntegrationTest()
+{
+    // Arrange: criar empresa
+    var newCompany = new
+    {
+        name = "CompanyToDelete",
+        document = _faker.Company.Cnpj(),
+        telephone = _faker.Phone.PhoneNumber(),
+        email = _faker.Internet.Email(),
+        password = _faker.Random.Hash()
+    };
+
+    var createResponse = await _client.PostAsJsonAsync("/api/empresa", newCompany);
+    var created = await createResponse.Content.ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
+    int id = created!.Data!.Id;
+
+    // Act: delete
+    var deleteResponse = await _client.DeleteAsync($"/api/empresa/{id}");
+
+    // Assert: 204
+    Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+    // GET deve retornar 404
+    var getResponse = await _client.GetAsync($"/api/empresa/{id}");
+    Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+}
+```
+
+### Dicas práticas
+
+- Use `WebApplicationFactory<Program>` com `InMemoryDatabase` para velocidade e isolamento.
+- Sempre crie (seed) os dados necessários no próprio teste (não dependa de estados externos).
+- Para verificar persistência, prefira reconsultar a API (GET) em vez de inspecionar DbContext interno — isso testa o fluxo completo.
+- Ao testar delete, considere cenários de dependência (empresa com vagas ativas) e crie testes que validem bloqueios/erros.
+
+### Execução
+
+```bash
+# Executar testes de integração (projeto de testes roda todos os testes)
+dotnet test BancoDeTalentos.Tests/BancoDeTalentos.Tests.csproj
+```
+
+---
+
+## 📦 Integração com CI
+
+- No pipeline, rode `dotnet test` em um job separado para testes de integração (ou com tags `Integration`).
+- Configure a pipeline para prover variáveis de ambiente e connection string alternativas, se for usar um banco real.
+- Para velocidade, prefira `InMemory` no CI para validações rápidas e teste com o banco real em um job de stage diferente, se necessário.
 
 ### Tipos de Testes
 

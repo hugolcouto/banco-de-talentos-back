@@ -5,14 +5,15 @@
 Um **Controller** é uma classe que gerencia as requisições HTTP. Ele:
 
 - ✅ Recebe requisições HTTP
+
+# <p><a href="README.md"><button>⬅ Voltar ao índice</button></a></p>
+
+# 9. Controllers e API Endpoints
+
 - ✅ Delega trabalho ao Service
 - ✅ Retorna responses HTTP
 - ✅ Define rotas (endpoints)
 
-### Responsabilidades
-
-✅ Extrair dados da requisição  
-✅ Chamar o Service apropriado  
 ✅ Retornar HTTP status correto  
 ✅ Transformar resultado em response
 
@@ -28,7 +29,6 @@ Um **Controller** é uma classe que gerencia as requisições HTTP. Ele:
 ## 🏗️ Anatomia de um Controller
 
 ```csharp
-// Arquivo: BancoDeTalentos.API/Controllers/CompanyController.cs
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using Microsoft.AspNetCore.Http;
@@ -181,7 +181,6 @@ public class CompanyController : ControllerBase
 ## 📤 Retornando Responses
 
 ```csharp
-// Status 200 OK com dados
 [HttpGet("{id}")]
 public IActionResult GetById(int id)
 {
@@ -239,7 +238,6 @@ public IActionResult GetById(int id)
 // Arquivo: BancoDeTalentos.API/Controllers/CompanyController.cs
 [HttpGet("{id}")]
 public IActionResult GetById(int id)
-{
     // 1. Validar entrada
     if (id <= 0)
     {
@@ -293,15 +291,14 @@ public IActionResult GetById(int id)
 
 ## 📝 Exemplo Completo: Implementar Get (todos)
 
-```csharp
 // Arquivo: BancoDeTalentos.API/Controllers/CompanyController.cs
 
 // Antes, no Service (futuro):
 public class CompanyService : ICompanyService
 {
-    public ResultViewModel<List<CompanyViewModel>> GetAllCompanies()
-    {
-        List<Company> companies = _companyRepository.GetAllCompanies();
+public ResultViewModel<List<CompanyViewModel>> GetAllCompanies()
+{
+List<Company> companies = \_companyRepository.GetAllCompanies();
 
         List<CompanyViewModel> viewModels = companies
             .Select(c => CompanyViewModel.FromEntity(c))
@@ -309,39 +306,42 @@ public class CompanyService : ICompanyService
 
         return ResultViewModel<List<CompanyViewModel>>.Success(viewModels);
     }
+
 }
 
 // No Controller:
 [HttpGet]
 public IActionResult Get()
 {
-    // 1. Chamar service
-    ResultViewModel<List<CompanyViewModel>> result =
-        _companyService.GetAllCompanies();
+// 1. Chamar service
+ResultViewModel<List<CompanyViewModel>> result =
+\_companyService.GetAllCompanies();
 
     // 2. Retornar resultado
     return Ok(result);
+
 }
 
 // Cliente: GET /api/empresa
 
 // Resposta 200 OK:
 // {
-//   "data": [
-//     {
-//       "id": 1,
-//       "name": "Acme Inc",
-//       ...
-//     },
-//     {
-//       "id": 2,
-//       "name": "TechCorp",
-//       ...
-//     }
-//   ],
-//   "isSuccess": true
+// "data": [
+// {
+// "id": 1,
+// "name": "Acme Inc",
+// ...
+// },
+// {
+// "id": 2,
+// "name": "TechCorp",
+// ...
 // }
-```
+// ],
+// "isSuccess": true
+// }
+
+````
 
 ---
 
@@ -386,7 +386,6 @@ public class CompanyService : ICompanyService
         if (string.IsNullOrWhiteSpace(model.Name))
             return ResultViewModel<CompanyViewModel>.Error(
                 "Nome é obrigatório", null);
-
         // Atualizar (implementar método na entidade)
         company.UpdateInfo(model.Name, model.About, model.Telephone);
 
@@ -432,9 +431,8 @@ public IActionResult Update(int id, UpdateCompanyModel model)
 //     "about": "New about",
 //     ...
 //   },
-//   "isSuccess": true
 // }
-```
+````
 
 ---
 
@@ -486,7 +484,7 @@ public IActionResult Delete(int id)
 
 ## 🎯 Estrutura de Entrada e Saída
 
-```csharp
+````csharp
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Requisição
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -497,7 +495,6 @@ Content-Type: application/json
 {
     "name": "Acme Inc",
     "document": "12345678000100",
-    "telephone": "1133334444",
     "email": "contact@acme.com",
     "password": "SecurePassword123"
 }
@@ -529,14 +526,9 @@ Location: /api/empresa/1
         "telephone": "1133334444",
         "email": "contact@acme.com",
         "about": ""
-    },
     "message": "",
     "isSuccess": true
 }
-```
-
----
-
 ## 🎯 Boas Práticas
 
 1. ✅ **Uma responsabilidade** - Apenas rotear e delegar
@@ -577,7 +569,7 @@ public IActionResult GetById(int id)
     Company company = _repository.GetCompanyById(id);
     return Ok(company);
 }
-```
+````
 
 ---
 
