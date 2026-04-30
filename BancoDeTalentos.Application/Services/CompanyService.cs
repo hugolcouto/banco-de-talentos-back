@@ -29,8 +29,25 @@ public class CompanyService : ICompanyService
         return ResultViewModel<CompanyViewModel>.Success(viewModel!);
     }
 
-    public ResultViewModel<CompanyViewModel> GetCompany(int id)
+    public ResultViewModel<List<CompanyViewModel>> GetCompanies()
     {
-        throw new NotImplementedException();
+        List<Company>? companies = _companyRepository.GetCompanies();
+
+        List<CompanyViewModel>? model = companies!.Select(
+            CompanyViewModel.FromEntity
+        ).ToList()!;
+
+        return ResultViewModel<List<CompanyViewModel>>.Success(model);
+    }
+
+    public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
+    {
+        Company? company = _companyRepository.GetCompanyById(id);
+
+        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+
+        return ResultViewModel<CompanyViewModel>.Success(
+            CompanyViewModel.FromEntity(company)!
+        );
     }
 }

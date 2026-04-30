@@ -11,9 +11,5 @@
     <Folder Include="ValueObjects/" />
     <Folder Include="ValueObjects/Resume/" />
   </ItemGroup>
-<!-- 
-  <ItemGroup>
-    <ProjectReference Include="../BancoDeTalentos.Application/BancoDeTalentos.Application.csproj" />
-  </ItemGroup> -->
 
 </Project>

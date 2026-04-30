@@ -10,37 +10,68 @@ namespace BancoDeTalentos.Tests.Integrations;
 public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
-    private readonly Faker _faker;
 
     public CompanyControllerTests(WebApplicationFactory<Program> factory)
     {
         _client = factory.CreateClient();
-        _faker = new Faker("pt_BR");
     }
 
-    [Fact]
-    public async Task Create_Company()
+    public static IEnumerable<object[]> GetCompanyTestData()
     {
-        // --- ARRANGE ---
-        var newCompanyObject = new
+        Faker faker = new Faker("pt_BR");
+
+        for (int i = 0; i <= 3; i++)
         {
-            name = _faker.Company.CompanyName(),
-            document = _faker.Company.Cnpj(),
-            telephone = _faker.Phone.PhoneNumber(),
-            email = _faker.Internet.Email(),
-            password = _faker.Random.Hash()
-        };
+            yield return new object[]
+            {
+                new
+                {
+                    name = faker.Company.CompanyName(),
+                    document = faker.Company.Cnpj(),
+                    telephone = faker.Phone.PhoneNumber(),
+                    email = faker.Internet.Email(),
+                    password = faker.Random.Hash()
+                }
+            };
+        }
+    }
 
-        // --- ASSERT ---
-        HttpResponseMessage response = await _client.PostAsJsonAsync("/api/empresa", newCompanyObject);
+    [Theory]
+    [MemberData(nameof(GetCompanyTestData))]
+    public async Task Company_Flow_Should_Work_Correctly(Object newCompanyPayload)
+    {
 
-        // --- ACTION ---
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        // Etapa 1 - Criar empresas
+        HttpResponseMessage? postResponse = await _client
+            .PostAsJsonAsync("/api/empresa", newCompanyPayload);
 
-        ResultViewModel<CompanyViewModel?>? result = await response.Content.ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
-        Assert.NotNull(result);
-        Assert.NotNull(result.Data);
-        Assert.Equal(newCompanyObject.name, result.Data!.Name);
-        Assert.True(result.Data!.Id > 0);
+        Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
+        var postResult = await postResponse
+            .Content
+            .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
+
+        Assert.NotNull(postResult?.Data);
+        int companyId = postResult.Data.Id;
+
+        dynamic payload = newCompanyPayload;
+        Assert.Equal((string)payload.name, postResult.Data.Name);
+        Assert.True(companyId > 0);
+
+        // Etapa 2 - Buscar empresa por ID
+        var getResponse = await _client.GetAsync($"/api/empresa/{companyId}");
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var getResult = await getResponse
+            .Content
+            .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
+
+        Assert.NotNull(getResult?.Data);
+        Assert.Equal(companyId, getResult?.Data.Id);
+        Assert.Equal((string)payload.name, getResult?.Data.Name);
+
+        // Etapa 3 - Listar todas as empresas
+        var listResponse = await _client.GetAsync("/api/empresa");
+        Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
     }
 }

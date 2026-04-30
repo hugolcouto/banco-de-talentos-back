@@ -33,13 +33,17 @@ public class CompanyController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        return Ok();
+        ResultViewModel<List<CompanyViewModel>> companies = _companyService.GetCompanies();
+
+        return Ok(companies);
     }
 
     [HttpGet("{id}")]
     public IActionResult GetById(int id)
     {
-        return Ok();
+        ResultViewModel<CompanyViewModel> company = _companyService.GetCompanyById(id);
+
+        return Ok(company);
     }
 
     // update
