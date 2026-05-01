@@ -1,3 +1,4 @@
+using BancoDeTalentos.API.Middleware;
 using BancoDeTalentos.Application;
 using BancoDeTalentos.Infrastructure;
 
@@ -8,7 +9,8 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-// Add services to the container.
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
