@@ -1,17 +1,17 @@
 using System.Net;
 using System.Net.Http.Json;
 using BancoDeTalentos.Application.Model;
+using BancoDeTalentos.Tests.Factories;
 using Bogus;
 using Bogus.Extensions.Brazil;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BancoDeTalentos.Tests.Integrations;
 
-public class CompanyControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class CompanyControllerTests : IClassFixture<TestingWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public CompanyControllerTests(WebApplicationFactory<Program> factory)
+    public CompanyControllerTests(TestingWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

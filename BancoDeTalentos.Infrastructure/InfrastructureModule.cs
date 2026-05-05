@@ -21,8 +21,6 @@ public static class InfrastructureModule
 
     private static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<BancoDeTalentosDbContext>();
-
         string dbConnectionString = configuration.GetConnectionString("SqlConnectionString")!;
 
         services.AddDbContext<BancoDeTalentosDbContext>(

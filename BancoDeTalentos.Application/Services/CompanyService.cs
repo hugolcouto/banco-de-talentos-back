@@ -1,5 +1,4 @@
 using System.Net;
-using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Core.Entities;
