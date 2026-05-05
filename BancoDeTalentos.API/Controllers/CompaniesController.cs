@@ -7,11 +7,11 @@ namespace BancoDeTalentos.API.Controllers;
 
 [Route("api/empresa")]
 [ApiController]
-public class CompanyController : ControllerBase
+public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companyService;
 
-    public CompanyController(ICompanyService companyService)
+    public CompaniesController(ICompanyService companyService)
     {
         _companyService = companyService;
     }
@@ -36,7 +36,6 @@ public class CompanyController : ControllerBase
         ResultViewModel<List<CompanyViewModel>> companies = _companyService.GetCompanies();
 
         return companies.ToActionResult(this);
-
     }
 
     [HttpGet("{id}")]
