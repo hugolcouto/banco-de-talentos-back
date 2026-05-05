@@ -1,5 +1,3 @@
-using System;
-
 namespace BancoDeTalentos.Core.Entities;
 
 public class Candidate : BaseEntity

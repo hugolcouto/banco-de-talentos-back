@@ -55,6 +55,11 @@ public class BaseEntity
 
     // Data de criação
     public DateTime CreatedAt { get; private set; }
+
+    // Exclusão lógica
+    public bool IsDeleted { get; private set; }
+
+    public void SetAsDeleted() => IsDeleted = true;
 }
 ```
 
@@ -64,6 +69,7 @@ public class BaseEntity
 2. **Consistência** - Todas as entidades têm o mesmo padrão
 3. **Encapsulamento** - Propriedades `private set`
 4. **Manutenção** - Mudança em um lugar afeta todas
+5. **Exclusão lógica** - `IsDeleted` e `SetAsDeleted()` centralizados
 
 ### Como Usar
 
@@ -86,6 +92,7 @@ var company = new Company("Acme Inc");
 // Automaticamente tem:
 // company.Id          (do BaseEntity)
 // company.CreatedAt   (do BaseEntity)
+// company.IsDeleted   (do BaseEntity)
 // company.Name        (próprio)
 ```
 

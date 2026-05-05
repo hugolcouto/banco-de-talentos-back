@@ -4,27 +4,30 @@
 
 ## ✅ Documentação Completa Criada
 
-**Total de 15 documentos** cobrindo 100% do projeto:
+**Total de 18 documentos** cobrindo 100% do projeto:
 
 ### 📚 Documentos Criados
 
-| #   | Documento                           | Descrição                              | Tipo        |
-| --- | ----------------------------------- | -------------------------------------- | ----------- |
-| 1   | 01-visao-geral.md                   | Propósito, tecnologias, requisitos     | Conceitual  |
-| 2   | 02-arquitetura-limpa.md             | Conceitos de arquitetura e SOLID       | Conceitual  |
-| 3   | 03-estrutura-projeto.md             | Organização de pastas e namespaces     | Referência  |
-| 4   | 04-injecao-dependencia.md           | DI, módulos, ciclos de vida            | Conceitual  |
-| 5   | 05-entities-value-objects.md        | Entidades e BaseEntity                 | Referência  |
-| 6   | 06-models-dtos.md                   | DTOs, ViewModels, mapeamento           | Referência  |
-| 7   | 07-repositories-pattern.md          | Padrão Repository, abstração           | Conceitual  |
-| 8   | 08-services-business-logic.md       | Camada de serviços, lógica             | Referência  |
-| 9   | 09-controllers-api.md               | Controllers, rotas, endpoints          | Referência  |
-| 10  | 10-fluxo-dados.md                   | Fluxo completo HTTP → Banco            | Conceitual  |
-| 11  | 11-entity-framework-persistencia.md | EF Core, DbContext, BD                 | Referência  |
-| 12  | 12-testes-integracao.md             | Testes, xUnit, WebApplicationFactory   | Prático     |
-| 13  | 13-guia-desenvolvimento.md          | **Passo-a-passo adicionar recurso**    | **Prático** |
-| 14  | 14-boas-praticas.md                 | **Convenções, segurança, performance** | **Guia**    |
-| 15  | 15-execucao-troubleshooting.md      | **Executar projeto, problemas**        | **Prático** |
+| #   | Documento                           | Descrição                                  | Tipo        |
+| --- | ----------------------------------- | ------------------------------------------ | ----------- |
+| 1   | 01-visao-geral.md                   | Propósito, tecnologias, requisitos         | Conceitual  |
+| 2   | 02-arquitetura-limpa.md             | Conceitos de arquitetura e SOLID           | Conceitual  |
+| 3   | 03-estrutura-projeto.md             | Organização de pastas e namespaces         | Referência  |
+| 4   | 04-injecao-dependencia.md           | DI, módulos, ciclos de vida                | Conceitual  |
+| 5   | 05-entities-value-objects.md        | Entidades e BaseEntity                     | Referência  |
+| 6   | 06-models-dtos.md                   | DTOs, ViewModels, mapeamento               | Referência  |
+| 7   | 07-repositories-pattern.md          | Padrão Repository, abstração               | Conceitual  |
+| 8   | 08-services-business-logic.md       | Camada de serviços, lógica                 | Referência  |
+| 9   | 09-controllers-api.md               | Controllers, rotas, endpoints              | Referência  |
+| 10  | 10-fluxo-dados.md                   | Fluxo completo HTTP → Banco                | Conceitual  |
+| 11  | 11-entity-framework-persistencia.md | EF Core, DbContext, BD                     | Referência  |
+| 12  | 12-testes-integracao.md             | Testes, xUnit, WebApplicationFactory       | Prático     |
+| 13  | 13-guia-desenvolvimento.md          | **Passo-a-passo adicionar recurso**        | **Prático** |
+| 14  | 14-boas-praticas.md                 | **Convenções, segurança, performance**     | **Guia**    |
+| 15  | 15-execucao-troubleshooting.md      | **Executar projeto, problemas**            | **Prático** |
+| 16  | 16-tratamento-null-errors.md        | **NullReferenceException, validações**     | **Guia**    |
+| 17  | 17-cast-exceptions-generic-types.md | **InvalidCastException, tipos genéricos**  | **Guia**    |
+| 18  | 18-http-status-codes.md             | **HTTP 200/404/400, Controllers resposta** | **Guia**    |
 
 ---
 
@@ -52,6 +55,12 @@
 9. Guia de Desenvolvimento (13) ← CRIAR NOVO RECURSO
    ↓
 10. Boas Práticas (14)
+   ↓
+11. Tratamento de Null e Errors (16) ← PREVENÇÃO DE BUGS
+   ↓
+12. Cast Exceptions e Tipos Genéricos (17) ← ERROS DE TIPO
+   ↓
+13. HTTP Status Codes e Respostas (18) ← API REST CORRETA
 ```
 
 ### 🟡 Nível Intermediário (Conhece .NET)

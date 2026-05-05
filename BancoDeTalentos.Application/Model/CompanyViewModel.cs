@@ -22,8 +22,10 @@ public class CompanyViewModel
     // public List<Job> Jobs { get; private set; } = new List<Job>();
 
     public static CompanyViewModel? FromEntity(Company? entity)
-        => new(
-            entity!.Id,
+        => entity is null
+        ? null
+        : new CompanyViewModel(
+            entity.Id,
             entity.Name,
             entity.Telephone,
             entity.Email,

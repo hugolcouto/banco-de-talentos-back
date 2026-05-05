@@ -1,3 +1,4 @@
+using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Core.Entities;
@@ -46,7 +47,7 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, ErrorCode.NOT_FOUND);
 
         return ResultViewModel<CompanyViewModel>.Success(
             CompanyViewModel.FromEntity(company)!
@@ -57,7 +58,7 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, ErrorCode.NOT_FOUND);
 
         _companyRepository.UpdateCompany(company!);
 
@@ -68,7 +69,7 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) ResultViewModel.Error("Empresa não encontrada");
+        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", "NOT_FOUND");
 
         company!.SetAsDeleted();
 

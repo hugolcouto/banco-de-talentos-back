@@ -69,6 +69,7 @@ _companyService = // ← Pode ser qualquer implementação
 ```csharp
 // Arquivo: BancoDeTalentos.Application/Services/CompanyService.cs
 using BancoDeTalentos.Application.Interfaces;
+using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Core.Entities;
 using BancoDeTalentos.Core.Interfaces;
@@ -95,7 +96,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Nome da empresa é obrigatório",
-                null
+                null,
+                ErrorCode.NOT_FOUND
             );
         }
 
@@ -103,7 +105,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Documento é obrigatório",
-                null
+                null,
+                ErrorCode.NOT_FOUND
             );
         }
 
@@ -133,14 +136,15 @@ public class CompanyService : ICompanyService
     // Implementação: Obter Empresa por ID
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    public ResultViewModel<CompanyViewModel> GetCompany(int id)
+    public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
     {
         // Passo 1: Validar entrada
         if (id <= 0)
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "ID inválido",
-                null
+                null,
+                ErrorCode.NOT_FOUND
             );
         }
 
@@ -152,7 +156,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Empresa não encontrada",
-                null
+                null,
+                ErrorCode.NOT_FOUND
             );
         }
 

@@ -31,7 +31,9 @@ public class CompanyRepository : ICompanyRepository
 
     public Company GetCompanyById(int id)
     {
-        Company? company = _context.Company.FirstOrDefault(c => c.Id == id)!;
+        Company? company = _context
+            .Company
+            .FirstOrDefault(c => c.Id == id && !c.IsDeleted)!;
 
         return company;
     }

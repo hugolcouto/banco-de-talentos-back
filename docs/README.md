@@ -98,6 +98,27 @@ Bem-vindo à documentação completa do projeto **Banco de Talentos API**. Este 
     - Pré-requisitos e instalação
     - Execução via Visual Studio, Command Line e VS Code
     - Testes automatizados
+
+16. **[Tratamento de Null e Prevenção de Erros](16-tratamento-null-errors.md)**
+    - "Object reference not set to an instance of an object"
+    - Padrões problemáticos e soluções
+    - Guard clauses e validação
+    - Null coalescing e null-conditional operators
+    - Estratégias de prevenção e testes
+
+17. **[InvalidCastException e Tipos Genéricos](17-cast-exceptions-generic-types.md)**
+    - "Unable to cast object of type..."
+    - Entendendo tipos genéricos vs não-genéricos
+    - Padrões que causam o erro
+    - Soluções e factory methods
+    - Prevenção com code review
+
+18. **[HTTP Status Codes e Tratamento de Erros em Controllers](18-http-status-codes.md)**
+    - Retornando status HTTP correto (200, 404, 400, etc)
+    - Mapeamento semântico de erros
+    - Extension Methods vs Base Controller
+    - Exemplos práticos com REST Client
+    - ErrorCodes estruturados
     - Resolução de problemas comuns
     - Troubleshooting detalhado
 

@@ -188,6 +188,8 @@ _context.SaveChanges();
 // Company removida do BD
 ```
 
+No projeto atual, a exclusão visível para `Company` é lógica: `SetAsDeleted()` marca `IsDeleted = true`, e os repositórios filtram esse campo para não expor registros excluídos em consultas normais.
+
 ---
 
 ## 📊 Rastreamento de Mudanças

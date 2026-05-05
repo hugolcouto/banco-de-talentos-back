@@ -1,3 +1,5 @@
+using BancoDeTalentos.API.Extensions;
+using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using Microsoft.AspNetCore.Http;
@@ -35,7 +37,8 @@ public class CompanyController : ControllerBase
     {
         ResultViewModel<List<CompanyViewModel>> companies = _companyService.GetCompanies();
 
-        return Ok(companies);
+        return companies.ToActionResult(this);
+
     }
 
     [HttpGet("{id}")]
@@ -43,7 +46,7 @@ public class CompanyController : ControllerBase
     {
         ResultViewModel<CompanyViewModel> company = _companyService.GetCompanyById(id);
 
-        return Ok(company);
+        return company.ToActionResult(this);
     }
 
     // update

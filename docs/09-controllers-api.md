@@ -29,6 +29,7 @@ Um **Controller** é uma classe que gerencia as requisições HTTP. Ele:
 ## 🏗️ Anatomia de um Controller
 
 ```csharp
+using BancoDeTalentos.API.Extensions;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using Microsoft.AspNetCore.Http;
@@ -89,8 +90,8 @@ public class CompanyController : ControllerBase
     // Rota completa: GET /api/empresa
     public IActionResult Get()
     {
-        // Por enquanto retorna OK vazio
-        return Ok();
+        // No projeto atual, a resposta é convertida em IActionResult
+        return _companyService.GetCompanies().ToActionResult(this);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -102,8 +103,8 @@ public class CompanyController : ControllerBase
     // Rota completa: GET /api/empresa/{id}
     public IActionResult GetById(int id)
     {
-        // Por enquanto retorna OK vazio
-        return Ok();
+        // No projeto atual, a resposta é convertida em IActionResult
+        return _companyService.GetCompanyById(id).ToActionResult(this);
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

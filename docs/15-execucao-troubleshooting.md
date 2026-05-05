@@ -467,6 +467,14 @@ public string? Password { get; private set; }
 
 ---
 
+### Problema 11: Exceções sem tratamento consistente
+
+**Causa:** exceções escapando diretamente sem um handler global no pipeline.
+
+**Solução:** o projeto registra `app.UseExceptionHandler()` em `Program.cs` para centralizar o tratamento de erros e manter respostas mais previsíveis.
+
+---
+
 ## 📊 Verificação de Saúde (Health Check)
 
 Adicionar health check em `Program.cs`:

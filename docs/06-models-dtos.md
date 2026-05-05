@@ -174,13 +174,15 @@ public class CompanyViewModel
 
     // Factory method para conversão
     public static CompanyViewModel? FromEntity(Company? entity)
-        => new(
-            entity!.Id,
-            entity.Name,
-            entity.Telephone,
-            entity.Email,
-            entity.About
-        );
+        => entity is null
+            ? null
+            : new(
+                entity.Id,
+                entity.Name,
+                entity.Telephone,
+                entity.Email,
+                entity.About
+            );
 }
 ```
 
@@ -245,25 +247,27 @@ namespace BancoDeTalentos.Application.Model;
 
 public class ResultViewModel
 {
-    public ResultViewModel(string message = "", bool isSuccess = true)
+    public ResultViewModel(string message = "", bool isSuccess = true, string? errorCode = null)
     {
         Message = message;
         IsSuccess = isSuccess;
+        ErrorCode = errorCode;
     }
 
     public string Message { get; set; }
     public bool IsSuccess { get; set; }
+    public string? ErrorCode { get; set; }
 
     // Factory methods
     public static ResultViewModel Sucess() => new();
-    public static ResultViewModel Error(string message) => new(message, false);
+    public static ResultViewModel Error(string message, string errorCode) => new(message, false, errorCode);
 }
 
 // Versão genérica com dados
 public class ResultViewModel<T> : ResultViewModel
 {
-    public ResultViewModel(T? data, string message = "", bool isSuccess = true)
-        : base(message, isSuccess)
+    public ResultViewModel(T? data, string message = "", bool isSuccess = true, string? errorCode = null)
+        : base(message, isSuccess, errorCode)
     {
         Data = data;
     }
@@ -272,8 +276,8 @@ public class ResultViewModel<T> : ResultViewModel
 
     // Factory methods
     public static ResultViewModel<T> Success(T data) => new(data);
-    public static ResultViewModel<T> Error(string message, T? data)
-        => new(data, message, false);
+    public static ResultViewModel<T> Error(string message, T? data, string errorCode)
+        => new(data, message, false, errorCode);
 }
 ```
 
@@ -309,13 +313,14 @@ var result = ResultViewModel<CompanyViewModel>.Success(viewModel);
 }
 
 // Erro
-var errorResult = ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null);
+var errorResult = ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, "NOT_FOUND");
 
 // JSON:
 {
     "data": null,
     "message": "Empresa não encontrada",
-    "isSuccess": false
+    "isSuccess": false,
+    "errorCode": "NOT_FOUND"
 }
 
 // Sem dados

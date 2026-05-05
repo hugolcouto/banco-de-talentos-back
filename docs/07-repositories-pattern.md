@@ -362,7 +362,7 @@ public interface ICompanyRepository
     void UpdateCompany(Company company);
 
     // Deletar
-    void DeleteCompany(int id);
+    void DeleteCompany(Company company);
 }
 ```
 
@@ -384,7 +384,7 @@ public class CompanyRepository : ICompanyRepository
 
     public Company? GetCompanyById(int id)
     {
-        return _context.Company.Find(id);
+        return _context.Company.FirstOrDefault(c => c.Id == id && !c.IsDeleted)!;
     }
 
     public List<Company> GetAllCompanies()
@@ -398,17 +398,16 @@ public class CompanyRepository : ICompanyRepository
         _context.SaveChanges();
     }
 
-    public void DeleteCompany(int id)
+    public void DeleteCompany(Company company)
     {
-        var company = _context.Company.Find(id);
-        if (company != null)
-        {
-            _context.Company.Remove(company);
-            _context.SaveChanges();
-        }
+        company.SetAsDeleted();
+        _context.Company.Update(company);
+        _context.SaveChanges();
     }
 }
 ```
+
+**Observação importante:** no projeto atual, a exclusão é lógica. Consultas públicas como `GetCompanies()` e `GetCompanyById()` ignoram registros com `IsDeleted = true`, então a empresa continua persistida para auditoria e histórico.
 
 ---
 
