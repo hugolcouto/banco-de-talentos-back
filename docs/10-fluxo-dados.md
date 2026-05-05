@@ -536,7 +536,7 @@ Se algo der errado, onde quebrou?
 ```
 Se erro em validação:
   ↓
-    Service retorna: ResultViewModel.Error("mensagem", ..., ErrorCode.NOT_FOUND)
+    Service retorna: ResultViewModel.Error("mensagem", HttpStatusCode.BadRequest/NotFound, ...)
   ↓
     Controller retorna: ToActionResult(this)
   ↓

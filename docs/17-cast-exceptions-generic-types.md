@@ -73,7 +73,7 @@ public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
 
     // ❌ PROBLEMA: Cast inválido!
     if (company is null)
-        return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("Empresa não encontrada");
+        return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
     return ResultViewModel<CompanyViewModel>.Success(company);
 }
@@ -83,73 +83,83 @@ public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
 
 **Passo 1: Chamar método não-genérico**
 
-```csharp
-ResultViewModel.Error("Empresa não encontrada")
+            return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
+
+using System.Net;
+ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound)
+
 ```
 
-Isso retorna:
+        return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
-```csharp
-ResultViewModel  // ← Tipo BASE, sem informação de tipo genérico
-{
-    Message = "Empresa não encontrada",
-    IsSuccess = false
-    // Sem propriedade Data!
-}
+ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound)
+ResultViewModel // ← Tipo BASE, sem informação de tipo genérico
+ResultViewModel base = ResultViewModel.Error("msg", HttpStatusCode.BadRequest);
+Message = "Empresa não encontrada",
+IsSuccess = false
+// Sem propriedade Data!
+return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
+
 ```
 
 **Passo 2: Tentar fazer cast**
 
-```csharp
-(ResultViewModel<CompanyViewModel>) ...  // ← Cast inválido!
+        return ResultViewModel.Error(ex.Message, HttpStatusCode.BadRequest);  // InvalidCastException!
+            return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
+
 ```
 
 **O problema:**
+return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", HttpStatusCode.NotFound, null);
 
 - `ResultViewModel` é um tipo que **não sabe** o que contém em `Data`
-- `ResultViewModel<CompanyViewModel>` precisa **saber exatamente** que `Data` é `CompanyViewModel`
+  return ResultViewModel.Error("msg", HttpStatusCode.BadRequest); // Qual erro? Genérico ou não?
 - Não há como converter de "desconhecido" para "conhecido"
-- É como tentar converter `object` para `List<string>` - impossível!
+  ResultViewModel.Error("msg", HttpStatusCode.BadRequest);
 
 **Passo 3: Runtime lança exceção**
 
 ```
+
 System.InvalidCastException
+
 ```
 
 ---
-
+            return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
 ### 📊 Hierarquia de Tipos
 
 ```
+
 ResultViewModel (classe base)
-    │
-    ├─ Message : string
-    ├─ IsSuccess : bool
-    └─ Métodos: Error(), Sucess()
-                    ↑
-                    │ Herança
-                    │
+│
+├─ Message : string
+├─ IsSuccess : bool
+└─ Métodos: Error(), Sucess()
+↑
+│ Herança
+│
 ResultViewModel<T> : ResultViewModel
-    │
-    ├─ Data : T  ← ⚠️ Tipo genérico
-    ├─ Métodos: Error(msg, data), Success(data)
-    │
-    ├─ ResultViewModel<Company>
-    ├─ ResultViewModel<CompanyViewModel>
-    ├─ ResultViewModel<string>
-    └─ ResultViewModel<List<int>>
-        ...
+│
+├─ Data : T ← ⚠️ Tipo genérico
+├─ Métodos: Error(msg, data), Success(data)
+│
+├─ ResultViewModel<Company>
+├─ ResultViewModel<CompanyViewModel>
+├─ ResultViewModel<string>
+└─ ResultViewModel<List<int>>
+...
+
 ```
 
 **A questão:**
 
-```csharp
+                    return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
 // ✅ FUNCIONA - mesma classe
 ResultViewModel<Company> x = ResultViewModel<Company>.Success(company);
 
 // ✅ FUNCIONA - herança não-genérica
-ResultViewModel base = ResultViewModel.Error("msg");
+ResultViewModel base = ResultViewModel.Error("msg", HttpStatusCode.BadRequest);
 
 // ❌ NÃO FUNCIONA - cast genérico é impossível
 ResultViewModel<Company> y = (ResultViewModel<Company>)base;
@@ -163,6 +173,8 @@ ResultViewModel<Company> z = (ResultViewModel<Company>)
 
 ## ⚠️ Padrões que Causam Este Erro
 
+            return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
+
 ### Padrão 1: Misturar Métodos Genéricos e Não-Genéricos
 
 ```csharp
@@ -171,7 +183,7 @@ public ResultViewModel<CompanyViewModel> GetCompany(int id)
 {
     if (id < 0)
         // Chama ResultViewModel.Error() (não-genérico)
-        return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido");
+        return (ResultViewModel<CompanyViewModel>)ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
 
     // ... resto do código
 }
@@ -286,7 +298,7 @@ public ResultViewModel DeleteCompany(int id)
 
     if (company is null)
         // Usar Error() não-genérico
-        return ResultViewModel.Error("Empresa não encontrada");
+        return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
     company.SetAsDeleted();
     _companyRepository.DeleteCompany(company);
@@ -358,7 +370,7 @@ Antes de chamar, entender:
 ```csharp
 // ❌ ANTES - Qual é o tipo de retorno?
 if (condition)
-    return ResultViewModel.Error("msg");  // Qual erro? Genérico ou não?
+    return ResultViewModel.Error("msg", HttpStatusCode.BadRequest);  // Qual erro? Genérico ou não?
 
 // ✅ DEPOIS - Verificar assinatura
 public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
@@ -376,7 +388,7 @@ public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
 ```csharp
 // ❌ NUNCA FAÇA ISTO
 return (ResultViewModel<CompanyViewModel>)
-    ResultViewModel.Error("msg");
+    ResultViewModel.Error("msg", HttpStatusCode.BadRequest);
 
 // ❌ NEM ISTO
 return (ResultViewModel<User>)

@@ -1,3 +1,4 @@
+using System.Net;
 using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
@@ -11,7 +12,6 @@ public class CompanyService : ICompanyService
 
     public CompanyService(ICompanyRepository companyRepository)
         => _companyRepository = companyRepository;
-
 
     public ResultViewModel<CompanyViewModel> CreateCompany(CreateCompanyModel model)
     {
@@ -30,8 +30,6 @@ public class CompanyService : ICompanyService
         return ResultViewModel<CompanyViewModel>.Success(viewModel!);
     }
 
-
-
     public ResultViewModel<List<CompanyViewModel>> GetCompanies()
     {
         List<Company>? companies = _companyRepository.GetCompanies();
@@ -47,7 +45,12 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, ErrorCode.NOT_FOUND);
+        if (company is null) return ResultViewModel<CompanyViewModel>
+            .Error(
+                "Empresa não encontrada",
+                HttpStatusCode.NotFound,
+                null
+            );
 
         return ResultViewModel<CompanyViewModel>.Success(
             CompanyViewModel.FromEntity(company)!
@@ -58,7 +61,12 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, ErrorCode.NOT_FOUND);
+        if (company is null) return ResultViewModel<CompanyViewModel>
+            .Error(
+                "Empresa não encontrada",
+                HttpStatusCode.NotFound,
+                null
+            );
 
         _companyRepository.UpdateCompany(company!);
 
@@ -69,7 +77,10 @@ public class CompanyService : ICompanyService
     {
         Company? company = _companyRepository.GetCompanyById(id);
 
-        if (company is null) return ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", "NOT_FOUND");
+        if (company is null) return ResultViewModel.Error(
+            "Empresa não encontrada",
+            HttpStatusCode.NotFound
+        );
 
         company!.SetAsDeleted();
 

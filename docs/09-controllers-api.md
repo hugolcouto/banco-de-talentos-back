@@ -207,7 +207,7 @@ public IActionResult Delete(int id)
     // ... deletar
     return NoContent();
 }
-
+    _companyRepository.DeleteCompany(company);
 // Status 400 Bad Request (entrada inválida)
 [HttpPost]
 public IActionResult Create(CreateCompanyModel model)
@@ -446,13 +446,13 @@ public class CompanyService : ICompanyService
     public ResultViewModel DeleteCompany(int id)
     {
         if (id <= 0)
-            return ResultViewModel.Error("ID inválido");
+            return ResultViewModel.Error("ID inválido", System.Net.HttpStatusCode.BadRequest);
 
         Company? company = _companyRepository.GetCompanyById(id);
         if (company == null)
-            return ResultViewModel.Error("Empresa não encontrada");
+            return ResultViewModel.Error("Empresa não encontrada", System.Net.HttpStatusCode.NotFound);
 
-        _companyRepository.DeleteCompany(id);
+        _companyRepository.DeleteCompany(company);
         return ResultViewModel.Sucess();
     }
 }

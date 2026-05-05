@@ -25,7 +25,7 @@ public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
 
     // ❌ PROBLEMA 1: Sem return
     if (company is null)
-        ResultViewModel.Error("Empresa não encontrada");
+        return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
     // ❌ PROBLEMA 2: company pode ser null aqui!
     return ResultViewModel<CompanyViewModel>.Success(
@@ -56,7 +56,7 @@ public ResultViewModel<CompanyViewModel> GetCompanyById(int id)
 ```csharp
 // ❌ ERRADO - Sem return
 if (company is null)
-    ResultViewModel.Error("Empresa não encontrada");
+    ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
 // Código continua aqui com company = null!
 company.SetAsDeleted();  // 💣 NullReferenceException
@@ -67,7 +67,7 @@ company.SetAsDeleted();  // 💣 NullReferenceException
 ```csharp
 // ✅ CERTO - Com return
 if (company is null)
-    return ResultViewModel.Error("Empresa não encontrada");
+    return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
 // Código só chega aqui se company != null
 company.SetAsDeleted();  // ✅ Seguro
@@ -163,7 +163,7 @@ public Company? GetCompanyById(int id)
 // Uso seguro
 var company = repository.GetCompanyById(id);
 if (company is null)
-    return ResultViewModel.Error("Empresa não encontrada");
+    return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
 company.SetAsDeleted();  // ✅ Seguro - já validou
 ```
@@ -264,17 +264,21 @@ public ResultViewModel<CompanyViewModel> CreateCompany(CreateCompanyModel model)
 
 No `.csproj`:
 
+using System.Net;
+
 ```xml
 <PropertyGroup>
     <Nullable>enable</Nullable>
-</PropertyGroup>
+        return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 ```
 
 **O que faz:**
+return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
 - Compilador avisa sobre uso de null
 - `string` = não-nulo obrigatório
 - `string?` = pode ser null
+  return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
 ---
 
@@ -286,14 +290,14 @@ public ResultViewModel UpdateCompany(int id, UpdateCompanyModel model)
 {
     // 1. Validar entrada
     if (model is null)
-        return ResultViewModel.Error("Dados obrigatórios");
+        return ResultViewModel.Error("Dados obrigatórios", HttpStatusCode.BadRequest);
 
     // 2. Recuperar recurso
     Company? company = _companyRepository.GetCompanyById(id);
 
     // 3. Validar se existe
     if (company is null)
-        return ResultViewModel.Error("Empresa não encontrada");
+        return ResultViewModel.Error("Empresa não encontrada", HttpStatusCode.NotFound);
 
     // 4. Agora é seguro usar company
     company.Update(model.Name, model.Email);
@@ -356,7 +360,7 @@ public class Company : BaseEntity
 // Uso seguro
 var company = Company.Create(model.Name, model.Email);
 if (company is null)
-    return ResultViewModel.Error("Dados inválidos");
+    return ResultViewModel.Error("Dados inválidos", HttpStatusCode.BadRequest);
 
 _repository.CreateCompany(company);  // ✅ Seguro
 ```

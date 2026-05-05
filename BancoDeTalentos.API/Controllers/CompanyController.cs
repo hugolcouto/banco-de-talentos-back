@@ -1,3 +1,4 @@
+using System.Net;
 using BancoDeTalentos.API.Extensions;
 using BancoDeTalentos.Application.Exceptions;
 using BancoDeTalentos.Application.Interfaces;

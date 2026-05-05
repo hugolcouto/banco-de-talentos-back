@@ -69,7 +69,7 @@ _companyService = // ← Pode ser qualquer implementação
 ```csharp
 // Arquivo: BancoDeTalentos.Application/Services/CompanyService.cs
 using BancoDeTalentos.Application.Interfaces;
-using BancoDeTalentos.Application.Exceptions;
+using System.Net;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Core.Entities;
 using BancoDeTalentos.Core.Interfaces;
@@ -96,8 +96,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Nome da empresa é obrigatório",
-                null,
-                ErrorCode.NOT_FOUND
+                HttpStatusCode.BadRequest,
+                null
             );
         }
 
@@ -105,8 +105,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Documento é obrigatório",
-                null,
-                ErrorCode.NOT_FOUND
+                HttpStatusCode.BadRequest,
+                null
             );
         }
 
@@ -143,8 +143,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "ID inválido",
-                null,
-                ErrorCode.NOT_FOUND
+                HttpStatusCode.BadRequest,
+                null
             );
         }
 
@@ -156,8 +156,8 @@ public class CompanyService : ICompanyService
         {
             return ResultViewModel<CompanyViewModel>.Error(
                 "Empresa não encontrada",
-                null,
-                ErrorCode.NOT_FOUND
+                HttpStatusCode.NotFound,
+                null
             );
         }
 

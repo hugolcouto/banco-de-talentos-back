@@ -242,12 +242,14 @@ public class CompanyViewModel
 ### 3. ResultViewModel - Padrão de Resposta
 
 ```csharp
+using System.Net;
+
 // Arquivo: BancoDeTalentos.Application/Model/ResultViewModel.cs
 namespace BancoDeTalentos.Application.Model;
 
 public class ResultViewModel
 {
-    public ResultViewModel(string message = "", bool isSuccess = true, string? errorCode = null)
+    public ResultViewModel(string message = "", bool isSuccess = true, HttpStatusCode? errorCode = null)
     {
         Message = message;
         IsSuccess = isSuccess;
@@ -256,17 +258,17 @@ public class ResultViewModel
 
     public string Message { get; set; }
     public bool IsSuccess { get; set; }
-    public string? ErrorCode { get; set; }
+    public HttpStatusCode? ErrorCode { get; set; }
 
     // Factory methods
     public static ResultViewModel Sucess() => new();
-    public static ResultViewModel Error(string message, string errorCode) => new(message, false, errorCode);
+    public static ResultViewModel Error(string message, HttpStatusCode errorCode) => new(message, false, errorCode);
 }
 
 // Versão genérica com dados
 public class ResultViewModel<T> : ResultViewModel
 {
-    public ResultViewModel(T? data, string message = "", bool isSuccess = true, string? errorCode = null)
+    public ResultViewModel(T? data, string message = "", bool isSuccess = true, HttpStatusCode? errorCode = null)
         : base(message, isSuccess, errorCode)
     {
         Data = data;
@@ -276,7 +278,7 @@ public class ResultViewModel<T> : ResultViewModel
 
     // Factory methods
     public static ResultViewModel<T> Success(T data) => new(data);
-    public static ResultViewModel<T> Error(string message, T? data, string errorCode)
+    public static ResultViewModel<T> Error(string message, HttpStatusCode errorCode, T? data)
         => new(data, message, false, errorCode);
 }
 ```
@@ -313,14 +315,14 @@ var result = ResultViewModel<CompanyViewModel>.Success(viewModel);
 }
 
 // Erro
-var errorResult = ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", null, "NOT_FOUND");
+var errorResult = ResultViewModel<CompanyViewModel>.Error("Empresa não encontrada", HttpStatusCode.NotFound, null);
 
 // JSON:
 {
     "data": null,
     "message": "Empresa não encontrada",
     "isSuccess": false,
-    "errorCode": "NOT_FOUND"
+    "errorCode": 404
 }
 
 // Sem dados

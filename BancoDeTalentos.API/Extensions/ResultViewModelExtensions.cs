@@ -1,4 +1,4 @@
-using BancoDeTalentos.Application.Exceptions;
+using System.Net;
 using BancoDeTalentos.Application.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,8 +27,7 @@ public static class ResultViewModelExtensions
 
         return result.ErrorCode switch
         {
-            string code when code.Contains(ErrorCode.NOT_FOUND)
-                => controller.NotFound(result),
+            HttpStatusCode.NotFound => controller.NotFound(result),
             _ => controller.BadRequest(result)
         };
     }
