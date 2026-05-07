@@ -329,7 +329,7 @@ public class Job : BaseEntity
         int myProperty,
         DateTime dueDate,
         int openedVacancies,
-        int hirerId
+        int companyId
     ) : base()
     {
         Title = title;
@@ -344,7 +344,7 @@ public class Job : BaseEntity
         MyProperty = myProperty;
         DueDate = dueDate;
         OpenedVacancies = openedVacancies;
-        HirerId = hirerId;
+        CompanyId = companyId;
     }
 
     public string Title { get; private set; }
@@ -359,7 +359,7 @@ public class Job : BaseEntity
     public int MyProperty { get; private set; }
     public DateTime DueDate { get; private set; } // Data limite para candidaturas
     public int OpenedVacancies { get; private set; }  // Quantas vagas abertas
-    public int HirerId { get; private set; }      // ID da empresa (Foreign Key)
+    public int CompanyId { get; private set; }      // ID da empresa (Foreign Key)
 }
 ```
 
@@ -402,7 +402,7 @@ public class Backoffice : BaseEntity
         │  - Title            │
         │  - Description      │
         │  - Salary           │
-        │  - HirerId (FK)     │
+        │  - CompanyId (FK)     │
         └─────────────────────┘
 
 

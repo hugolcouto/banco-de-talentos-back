@@ -9,13 +9,13 @@ public interface IJobService
     ResultViewModel<JobViewModel> CreateJob(JobViewModel model);
 
     // Read
-    ResultViewModel<JobViewModel> GetJobs();
+    ResultViewModel<List<JobViewModel>> GetJobs();
     ResultViewModel<JobViewModel> GetJobById(int id);
 
     // Update
     // TODO: Alterar o model para UpdateJobModel
-    ResultViewModel<JobViewModel> UpdateJob(int id, CreateJobModel model);
+    ResultViewModel UpdateJob(int id, UpdateJobModel model);
 
     // Delete
-    ResultViewModel<JobViewModel> DeleteJob(int id);
+    ResultViewModel DeleteJob(int id);
 }

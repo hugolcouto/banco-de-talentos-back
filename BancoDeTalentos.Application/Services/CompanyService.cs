@@ -19,7 +19,8 @@ public class CompanyService : ICompanyService
             model.Document,
             model.Telephone,
             model.Email,
-            model.Password
+            model.Password,
+            model.About
         );
 
         _companyRepository.CreateCompany(company);
@@ -66,6 +67,13 @@ public class CompanyService : ICompanyService
                 HttpStatusCode.NotFound,
                 null
             );
+
+        company.Update(
+            model.Name,
+            model.Telephone,
+            model.Email,
+            model.About
+        );
 
         _companyRepository.UpdateCompany(company!);
 

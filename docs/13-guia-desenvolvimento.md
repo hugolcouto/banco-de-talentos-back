@@ -45,7 +45,7 @@ public class Job : BaseEntity
         int myProperty,
         DateTime dueDate,
         int openedVacancies,
-        int hirerId
+        int companyId
     ) : base()
     {
         Title = title;
@@ -60,7 +60,7 @@ public class Job : BaseEntity
         MyProperty = myProperty;
         DueDate = dueDate;
         OpenedVacancies = openedVacancies;
-        HirerId = hirerId;
+        CompanyId = companyId;
     }
 
     // Propriedades com private set
@@ -76,7 +76,7 @@ public class Job : BaseEntity
     public int MyProperty { get; private set; }
     public DateTime DueDate { get; private set; }
     public int OpenedVacancies { get; private set; }
-    public int HirerId { get; private set; }
+    public int CompanyId { get; private set; }
 }
 ```
 
@@ -105,7 +105,7 @@ public class CreateJobModel
     public bool ShowSalary { get; set; }
     public DateTime DueDate { get; set; }
     public int OpenedVacancies { get; set; }
-    public int CompanyId { get; set; }  // Referência à empresa (não HirerId)
+    public int CompanyId { get; set; }  // Referência à empresa (não CompanyId)
 }
 ```
 
@@ -150,7 +150,7 @@ public class JobViewModel
 
     // ❌ NÃO incluído: Requirements, OptionalRequirements (pode ser muito texto)
     // ❌ NÃO incluído: Benefits (detalhe)
-    // ❌ NÃO incluído: HirerId (interno)
+    // ❌ NÃO incluído: CompanyId (interno)
 
     public static JobViewModel? FromEntity(Job? entity)
         => new(
@@ -241,7 +241,7 @@ public class JobService : IJobService
             0,  // myProperty
             model.DueDate,
             model.OpenedVacancies,
-            model.CompanyId  // hirerId = companyId
+            model.CompanyId  // companyId = companyId
         );
 
         // 4. Persistir
@@ -336,7 +336,7 @@ public class JobRepository : IJobRepository
     public List<Job> GetJobsByCompanyId(int companyId)
     {
         return _context.Jobs
-            .Where(j => j.HirerId == companyId)
+            .Where(j => j.CompanyId == companyId)
             .ToList();
     }
 

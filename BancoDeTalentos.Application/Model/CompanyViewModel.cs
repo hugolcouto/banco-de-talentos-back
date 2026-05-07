@@ -9,8 +9,8 @@ public class CompanyViewModel
         string name,
         string telephone,
         string email,
-        string about,
-        List<Job> jobs
+        string about
+    // List<Job> jobs
     )
     {
         Id = id;
@@ -18,7 +18,7 @@ public class CompanyViewModel
         Telephone = telephone;
         Email = email;
         About = about;
-        Jobs = jobs;
+        // Jobs = jobs;
     }
 
     public int Id { get; set; }
@@ -26,7 +26,7 @@ public class CompanyViewModel
     public string Telephone { get; private set; }
     public string Email { get; private set; }
     public string About { get; private set; }
-    public List<Job> Jobs { get; private set; } = new List<Job>();
+    // public List<Job> Jobs { get; private set; } = new List<Job>();
 
     public static CompanyViewModel? FromEntity(Company? entity)
         => entity is null
@@ -36,7 +36,7 @@ public class CompanyViewModel
             entity.Name,
             entity.Telephone,
             entity.Email,
-            entity.About,
-            entity.Jobs
+            entity.About
+        // entity.Jobs
         );
 }

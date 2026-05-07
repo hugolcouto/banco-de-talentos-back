@@ -2,7 +2,7 @@ using System;
 
 namespace BancoDeTalentos.Application.Model;
 
-public class CreateJobModel
+public class UpdateJobModel
 {
     public string Title { get; set; }
     public string Description { get; set; }
@@ -16,5 +16,4 @@ public class CreateJobModel
     public DateTime DueDate { get; set; }
     public int OpenedVacancies { get; set; }
     public int CompanyId { get; set; }
-
 }

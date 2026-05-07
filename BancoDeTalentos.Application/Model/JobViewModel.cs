@@ -6,6 +6,7 @@ namespace BancoDeTalentos.Application.Model;
 public class JobViewModel
 {
     public JobViewModel(
+        int id,
         string title,
         string description,
         string benefits,
@@ -15,9 +16,11 @@ public class JobViewModel
         string modality,
         decimal salary,
         DateTime dueDate,
-        int openedVacancies
+        int openedVacancies,
+        int companyId
     )
     {
+        Id = id;
         Title = title;
         Description = description;
         Benefits = benefits;
@@ -28,8 +31,11 @@ public class JobViewModel
         Salary = salary;
         DueDate = dueDate;
         OpenedVacancies = openedVacancies;
+        CompanyId = companyId;
+
     }
 
+    public int Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
     public string Benefits { get; set; }
@@ -40,11 +46,13 @@ public class JobViewModel
     public decimal Salary { get; set; }
     public DateTime DueDate { get; set; }
     public int OpenedVacancies { get; set; }
+    public int CompanyId { get; set; }
 
     public static JobViewModel? FromEntity(Job entity)
         => entity is null
             ? null
             : new JobViewModel(
+                entity.Id,
                 entity.Title,
                 entity.Description,
                 entity.Benefits,
@@ -54,6 +62,7 @@ public class JobViewModel
                 entity.Modality,
                 entity.Salary,
                 entity.DueDate,
-                entity.OpenedVacancies
+                entity.OpenedVacancies,
+                entity.CompanyId
             );
 }

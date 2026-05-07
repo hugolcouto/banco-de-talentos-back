@@ -1,6 +1,5 @@
 using BancoDeTalentos.Core.Entities;
 using BancoDeTalentos.Core.Interfaces;
-using Microsoft.Identity.Client;
 
 namespace BancoDeTalentos.Infrastructure.Persistence.Repositories;
 

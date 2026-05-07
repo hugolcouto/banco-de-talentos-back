@@ -1,38 +1,125 @@
 using System;
+using System.Net;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
+using BancoDeTalentos.Core.Entities;
+using BancoDeTalentos.Core.Interfaces;
 
 namespace BancoDeTalentos.Application.Services;
 
 public class JobService : IJobService
 {
+    private readonly IJobRepository _jobRepository;
+
+    public JobService(IJobRepository jobRepository)
+        => _jobRepository = jobRepository;
+
     // Create
     public ResultViewModel<JobViewModel> CreateJob(JobViewModel model)
     {
-        throw new NotImplementedException();
+        Job job = new Job(
+            model.Title,
+            model.Description,
+            model.Benefits,
+            model.Requirements,
+            model.OptionalRequirements,
+            model.Address,
+            model.Modality,
+            model.Salary,
+            model.DueDate,
+            model.OpenedVacancies,
+            model.CompanyId
+        );
+
+        _jobRepository.CreateJob(job);
+
+        JobViewModel? viewModel = JobViewModel.FromEntity(job);
+
+        return ResultViewModel<JobViewModel>.Success(viewModel!);
     }
 
     // Read
     public ResultViewModel<JobViewModel> GetJobById(int id)
     {
-        throw new NotImplementedException();
+        Job? job = _jobRepository.GetJobById(id);
+
+        if (job is null) return ResultViewModel<JobViewModel>
+            .Error(
+                "Vaga não encontrada",
+                HttpStatusCode.NotFound,
+                null
+            );
+
+        return ResultViewModel<JobViewModel>.Success(
+            JobViewModel.FromEntity(job)!
+        );
     }
 
-    public ResultViewModel<JobViewModel> GetJobs()
+    public ResultViewModel<List<JobViewModel>> GetJobs()
     {
-        throw new NotImplementedException();
+        List<Job> jobs = _jobRepository.GetJobs()!;
+
+        List<JobViewModel>? model = jobs!.Select(
+            JobViewModel.FromEntity
+        ).ToList()!;
+
+        return ResultViewModel<List<JobViewModel>>.Success(model);
     }
+
+    // TODO: Implementar get de jobs por CompanyId
+    // public ResultViewModel<JobViewModel> GetJobsByCompany(int CompanyId)
+    // {
+    //     return ;
+    // }
 
     // Update
-    public ResultViewModel<JobViewModel> UpdateJob(int id, CreateJobModel model)
+    public ResultViewModel UpdateJob(int id, UpdateJobModel model)
     {
-        throw new NotImplementedException();
+        Job? job = _jobRepository.GetJobById(id);
+
+        if (job is null) return ResultViewModel<JobViewModel>
+            .Error(
+                "Vaga não encontrada",
+                HttpStatusCode.NotFound,
+                null
+            );
+
+        job.Update(
+            model.Title,
+            model.Description,
+            model.Benefits,
+            model.Requirements,
+            model.OptionalRequirements,
+            model.Address,
+            model.Modality,
+            model.Salary,
+            model.ShowSalary,
+            model.DueDate,
+            model.OpenedVacancies,
+            model.CompanyId
+        );
+
+        _jobRepository.UpdateJob(job);
+
+        return ResultViewModel.Sucess();
+
     }
 
     // Delete
-    public ResultViewModel<JobViewModel> DeleteJob(int id)
+    public ResultViewModel DeleteJob(int id)
     {
-        throw new NotImplementedException();
+        Job? job = _jobRepository.GetJobById(id);
+
+        if (job is null) return ResultViewModel<JobViewModel>
+            .Error(
+                "Vaga não encontrada",
+                HttpStatusCode.NotFound,
+                null
+            );
+
+        _jobRepository.DeleteJob(job);
+
+        return ResultViewModel.Sucess();
     }
 
 

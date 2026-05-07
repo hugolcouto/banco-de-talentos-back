@@ -1,15 +1,20 @@
 using System;
+using BancoDeTalentos.Core.Entities;
 
 namespace BancoDeTalentos.Core.Interfaces;
 
 public interface IJobRepository
 {
     // Create
-    
+    int CreateJob(Job job);
 
     // Read
+    List<Job>? GetJobs();
+    Job? GetJobById(int id);
 
     // Update
+    void UpdateJob(Job job);
 
     // Delete
+    void DeleteJob(Job job);
 }

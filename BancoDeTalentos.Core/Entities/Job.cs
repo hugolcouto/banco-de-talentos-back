@@ -13,10 +13,9 @@ public class Job : BaseEntity
         string address,
         string modality,
         decimal salary,
-        int myProperty,
         DateTime dueDate,
         int openedVacancies,
-        int hirerId
+        int companyId
     ) : base()
     {
         Title = title;
@@ -28,10 +27,9 @@ public class Job : BaseEntity
         Modality = modality;
         Salary = salary;
         ShowSalary = true;
-        MyProperty = myProperty;
         DueDate = dueDate;
         OpenedVacancies = openedVacancies;
-        HirerId = hirerId;
+        CompanyId = companyId;
     }
 
     public string Title { get; private set; }
@@ -43,8 +41,36 @@ public class Job : BaseEntity
     public string Modality { get; private set; }
     public decimal Salary { get; private set; }
     public bool ShowSalary { get; private set; }
-    public int MyProperty { get; private set; }
     public DateTime DueDate { get; private set; }
     public int OpenedVacancies { get; private set; }
-    public int HirerId { get; private set; }
+    public int CompanyId { get; private set; }
+
+    public void Update(
+        string title,
+        string description,
+        string benefits,
+        string requirements,
+        string optionalRequirements,
+        string address,
+        string modality,
+        decimal salary,
+        bool showSalary,
+        DateTime dueDate,
+        int openedVacancies,
+        int companyId
+    )
+    {
+        Title = title;
+        Description = description;
+        Benefits = benefits;
+        Requirements = requirements;
+        OptionalRequirements = optionalRequirements;
+        Address = address;
+        Modality = modality;
+        Salary = salary;
+        ShowSalary = showSalary;
+        DueDate = dueDate;
+        OpenedVacancies = openedVacancies;
+        CompanyId = companyId;
+    }
 }
