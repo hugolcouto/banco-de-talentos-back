@@ -1,8 +1,9 @@
 using BancoDeTalentos.API.Middleware;
 using BancoDeTalentos.Application;
 using BancoDeTalentos.Infrastructure;
+using Scalar.AspNetCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Dependency injection via modules
 builder.Services
@@ -16,7 +17,8 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
+
+WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 
@@ -24,6 +26,7 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

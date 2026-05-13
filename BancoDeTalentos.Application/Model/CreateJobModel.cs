@@ -4,6 +4,22 @@ namespace BancoDeTalentos.Application.Model;
 
 public class CreateJobModel
 {
+    public CreateJobModel(string title, string description, string benefits, string requirements, string optionalRequirements, string address, string modality, decimal salary, bool showSalary, DateTime dueDate, int openedVacancies, int companyId)
+    {
+        Title = title;
+        Description = description;
+        Benefits = benefits;
+        Requirements = requirements;
+        OptionalRequirements = optionalRequirements;
+        Address = address;
+        Modality = modality;
+        Salary = salary;
+        ShowSalary = showSalary;
+        DueDate = dueDate;
+        OpenedVacancies = openedVacancies;
+        CompanyId = companyId;
+    }
+
     public string Title { get; set; }
     public string Description { get; set; }
     public string Benefits { get; set; }
