@@ -27,6 +27,10 @@ public class BancoDeTalentosDbContext : DbContext
             e => e.HasKey(c => c.Id)
         );
 
+        modelBuilder.Entity<Job>(
+            e => e.HasKey(j => j.Id)
+        );
+
         base.OnModelCreating(modelBuilder);
     }
 }

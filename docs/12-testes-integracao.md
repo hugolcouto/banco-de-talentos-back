@@ -89,7 +89,10 @@ public async Task Delete_Company_IntegrationTest()
     // Assert: 204
     Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-    // GET deve retornar 404
+    // GET deve retornar 404 porque:
+    // 1. Service chamou SetAsDeleted() → IsDeleted = true
+    // 2. GetJobById/GetCompanyById filtra WHERE !IsDeleted
+    // 3. O registro não existe mais para consultas normais
     var getResponse = await _client.GetAsync($"/api/empresa/{id}");
     Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
 }
@@ -606,6 +609,49 @@ Assert.True(response.StatusCode == HttpStatusCode.Created);
 var result = await response.Content.ReadFromJsonAsync<...>();
 // result pode ser null! Adicione Assert.NotNull(result)
 ```
+
+---
+
+## 🔧 Troubleshooting de Testes de Delete
+
+** Sintoma:** Teste de Delete falha porque `GET /api/recurso/{id}` após o `DELETE` retorna `200 OK` em vez de `404 Not Found`.
+
+**Causa raiz (já vista em `JobControllerTests.Job_Flow_Should_Work`):**
+1. Service não chamou `entity.SetAsDeleted()` antes de `repository.DeleteEntity(entity)`
+2. **OU** Repository usa `_context.Remove(entity)` (hard delete) em vez de `_context.Update(entity)` (soft delete)
+3. **OU** Método `GetById` não filtra por `!IsDeleted`
+
+**Como depurar:**
+
+```csharp
+// No teste, adicione logs para inspecionar:
+[Fact]
+public async Task Delete_Job_ShouldReturn404AfterDelete()
+{
+    // Arrange: criar job
+    int jobId = await CreateJob(...);
+
+    // Act: deletar
+    var deleteResponse = await _client.DeleteAsync($"/api/vaga/{jobId}");
+    Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+    // Debug: verificar se IsDeleted está true no banco
+    // (Isso requer expor DbContext no teste ou adicionar endpoint de debug)
+    // Se IsDeleted == false → Service esqueceu SetAsDeleted()
+    // Se IsDeleted == true mas GET retorna 200 → GetById não filtra !IsDeleted
+
+    // Assert: GET deve ser 404
+    var getResponse = await _client.GetAsync($"/api/vaga/{jobId}");
+    Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
+}
+```
+
+**Checklist de correção:**
+
+- [ ] Service: `entity.SetAsDeleted()` chamado antes de `_repository.Delete(entity)`
+- [ ] Repository: `Delete(Entity entity)` usa `_context.Update(entity)`, não `_context.Remove(entity)`
+- [ ] Repository: `GetById(id)` inclui `&& !entity.IsDeleted` no filtro
+- [ ] Teste valida: DELETE → 204, GET posterior → 404
 
 ---
 

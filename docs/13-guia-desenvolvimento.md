@@ -275,7 +275,33 @@ public class JobService : IJobService
         return ResultViewModel<List<JobViewModel>>.Success(viewModels);
     }
 
-    // ... outros métodos similares ...
+    public ResultViewModel<List<JobViewModel>> GetJobsByCompany(int companyId)
+    {
+        if (companyId <= 0)
+            return ResultViewModel<List<JobViewModel>>.Error("ID da empresa inválido", null);
+
+        List<Job> jobs = _jobRepository.GetJobsByCompanyId(companyId);
+        List<JobViewModel> viewModels = jobs
+            .Select(j => JobViewModel.FromEntity(j))
+            .ToList();
+
+        return ResultViewModel<List<JobViewModel>>.Success(viewModels);
+    }
+
+    public ResultViewModel DeleteJob(int id)
+    {
+        if (id <= 0)
+            return ResultViewModel.Error("ID inválido", HttpStatusCode.BadRequest);
+
+        Job? job = _jobRepository.GetJobById(id);
+        if (job is null)
+            return ResultViewModel.Error("Vaga não encontrada", HttpStatusCode.NotFound);
+
+        job.SetAsDeleted();                    // ← OBRIGATÓRIO: marca IsDeleted = true
+        _jobRepository.DeleteJob(job);        // ← Repository persiste via Update()
+
+        return ResultViewModel.Sucess();
+    }
 }
 ```
 
@@ -294,7 +320,7 @@ public interface IJobRepository
     List<Job> GetAllJobs();
     List<Job> GetJobsByCompanyId(int companyId);
     void UpdateJob(Job job);
-    void DeleteJob(int id);
+    void DeleteJob(Job job);  // ← Recebe a entidade já marcada com SetAsDeleted()
 }
 ```
 
@@ -325,18 +351,20 @@ public class JobRepository : IJobRepository
 
     public Job? GetJobById(int id)
     {
-        return _context.Jobs.FirstOrDefault(j => j.Id == id);
+        return _context.Jobs.FirstOrDefault(j => j.Id == id && !j.IsDeleted);
     }
 
     public List<Job> GetAllJobs()
     {
-        return _context.Jobs.ToList();
+        return _context.Jobs
+            .Where(j => !j.IsDeleted)
+            .ToList();
     }
 
     public List<Job> GetJobsByCompanyId(int companyId)
     {
         return _context.Jobs
-            .Where(j => j.CompanyId == companyId)
+            .Where(j => j.CompanyId == companyId && !j.IsDeleted)
             .ToList();
     }
 
@@ -346,14 +374,10 @@ public class JobRepository : IJobRepository
         _context.SaveChanges();
     }
 
-    public void DeleteJob(int id)
+    public void DeleteJob(Job job)  // ← Recebe entidade já com SetAsDeleted()
     {
-        var job = _context.Jobs.Find(id);
-        if (job != null)
-        {
-            _context.Jobs.Remove(job);
-            _context.SaveChanges();
-        }
+        _context.Jobs.Update(job);    // ← Persiste IsDeleted = true
+        _context.SaveChanges();
     }
 }
 ```

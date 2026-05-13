@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Runtime.ConstrainedExecution;
 using BancoDeTalentos.Application.Interfaces;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Core.Entities;
@@ -15,7 +16,7 @@ public class JobService : IJobService
         => _jobRepository = jobRepository;
 
     // Create
-    public ResultViewModel<JobViewModel> CreateJob(JobViewModel model)
+    public ResultViewModel<JobViewModel> CreateJob(CreateJobModel model)
     {
         Job job = new Job(
             model.Title,
@@ -113,10 +114,10 @@ public class JobService : IJobService
         if (job is null) return ResultViewModel<JobViewModel>
             .Error(
                 "Vaga não encontrada",
-                HttpStatusCode.NotFound,
-                null
+                HttpStatusCode.NotFound
             );
 
+        job.SetAsDeleted();
         _jobRepository.DeleteJob(job);
 
         return ResultViewModel.Sucess();

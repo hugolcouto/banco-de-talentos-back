@@ -263,6 +263,139 @@ public IActionResult GetById(int id)
 
 ---
 
+## 🗑️ Soft Delete Pattern
+
+Todas as entidades herdam de `BaseEntity`, que possui a propriedade `IsDeleted` e o método `SetAsDeleted()`. A exclusão no projeto é **sempre lógica** -- nunca física. O registro permanece no banco de dados, mas é marcado como deletado e ignorado em consultas públicas.
+
+### Regras Obrigatórias
+
+**Regra 1: Service deve chamar `SetAsDeleted()` antes de invocar o Repository**
+
+```csharp
+// ✅ CERTO
+public ResultViewModel DeleteJob(int id)
+{
+    Job? job = _jobRepository.GetJobById(id);
+    if (job is null)
+        return ResultViewModel.Error("Vaga não encontrada", HttpStatusCode.NotFound);
+
+    job.SetAsDeleted();                            // ← OBRIGATÓRIO
+    _jobRepository.DeleteJob(job);
+    return ResultViewModel.Sucess();
+}
+
+// ❌ ERRADO - Esqueceu SetAsDeleted()
+public ResultViewModel DeleteJob(int id)
+{
+    Job? job = _jobRepository.GetJobById(id);
+    if (job is null)
+        return ResultViewModel.Error("Vaga não encontrada", HttpStatusCode.NotFound);
+
+    _jobRepository.DeleteJob(job);                 // ← BUG! IsDeleted continua false
+    return ResultViewModel.Sucess();
+}
+
+// Consequência do ❌:
+// 1. DeleteJob() executa sem problemas
+// 2. GetJobById(id) após DELETE retorna o registro (IsDeleted = false)
+// 3. Teste falha: espera NotFound, recebe OK
+```
+
+**Regra 2: Repository Delete deve usar `Update()` (nunca `Remove()`)**
+
+```csharp
+// ✅ CERTO - Persiste apenas a mudança de IsDeleted
+public void DeleteJob(Job job)
+{
+    _context.Jobs.Update(job);     // Apenas atualiza IsDeleted = true
+    _context.SaveChanges();
+}
+
+// ❌ ERRADO - Exclui fisicamente o registro
+public void DeleteJob(Job job)
+{
+    _context.Jobs.Remove(job);     // Deleta a linha do banco
+    _context.SaveChanges();
+}
+
+// Consequência do ❌:
+// 1. Registro some completamente do banco
+// 2. Não há histórico de exclusão para auditoria
+// 3. Quebra o contrato do projeto (todas as entidades usam soft delete)
+```
+
+**Regra 3: Queries públicas devem SEMPRE filtrar `!IsDeleted`**
+
+```csharp
+// ✅ CERTO - Filtra ativos apenas
+public Job? GetJobById(int id)
+{
+    return _context.Jobs
+        .SingleOrDefault(j => j.Id == id && !j.IsDeleted);
+}
+
+public List<Job> GetJobs()
+{
+    return _context.Jobs
+        .Where(j => !j.IsDeleted)
+        .ToList();
+}
+
+// ❌ ERRADO - Inclui deletados nas consultas
+public Job? GetJobById(int id)
+{
+    return _context.Jobs.Find(id);  // Pode retornar registro com IsDeleted = true
+}
+```
+
+### Por que Soft Delete?
+
+| Vantagem | Explicação |
+|---|---|
+| **Auditoria** | Permite saber quem foi deletado e quando (via CreatedAt) |
+| **Recuperação** | Dados podem ser restaurados (basta `IsDeleted = false`) |
+| **Histórico** | Mantém relacionamentos consistentes (não quebra chaves estrangeiras) |
+| **Conformidade** | Algumas regulamentações exigem retenção de dados |
+
+### Checklist de Implementação
+
+Ao implementar Delete, verificar:
+
+- [ ] Service chama `entity.SetAsDeleted()` antes do Repository
+- [ ] Repository usa `_context.Update(entity)`, não `_context.Remove(entity)`
+- [ ] Repository não recebe `id` como parâmetro -- recebe a entidade já marcada
+- [ ] Todos os métodos `Get*` possuem filtro `!entity.IsDeleted`
+- [ ] Teste de integração valida: DELETE retorna 204, GET posterior retorna 404
+
+### Troubleshooting Rápido
+
+** Sintoma:** `GET /api/vaga/{id}` retorna 200 OK após ter feito `DELETE /api/vaga/{id}`
+
+**Causa mais provável:** `SetAsDeleted()` não foi chamado no Service antes de `_jobRepository.DeleteJob(job)`
+
+**Verificar:**
+
+1. No Service, linha antes de `_jobRepository.DeleteJob(...)`: existe `job.SetAsDeleted()`?
+2. No Repository, método `DeleteJob` usa `Update()` ou `Remove()`?
+3. No Repository, método `GetJobById` inclui `!j.IsDeleted` no filtro?
+
+**Correção:**
+
+```csharp
+// Service
+public ResultViewModel DeleteJob(int id)
+{
+    Job? job = _jobRepository.GetJobById(id);
+    if (job is null) return ResultViewModel.Error("Não encontrado", HttpStatusCode.NotFound);
+
+    job.SetAsDeleted();                  // ← Adicionar esta linha
+    _jobRepository.DeleteJob(job);
+    return ResultViewModel.Sucess();
+}
+```
+
+---
+
 ### 2. Validação de Entrada
 
 ```csharp

@@ -270,6 +270,67 @@ POST /api/empresa
 
 ---
 
+## 📝 Exemplo Prático: Repository com Soft Delete
+
+```csharp
+// Arquivo: BancoDeTalentos.Infrastructure/Persistence/Repositories/JobRepository.cs
+public class JobRepository : IJobRepository
+{
+    private readonly BancoDeTalentosDbContext _context;
+
+    public JobRepository(BancoDeTalentosDbContext context)
+        => _context = context;
+
+    // CREATE
+    public int CreateJob(Job job)
+    {
+        _context.Jobs.Add(job);
+        _context.SaveChanges();
+        return job.Id;
+    }
+
+    // READ by ID (filtra !IsDeleted)
+    public Job? GetJobById(int id)
+    {
+        return _context.Jobs
+            .SingleOrDefault(j => j.Id == id && !j.IsDeleted);
+    }
+
+    // READ all (apenas ativos)
+    public List<Job> GetAllJobs()
+    {
+        return _context.Jobs
+            .Where(j => !j.IsDeleted)
+            .ToList();
+    }
+
+    // UPDATE
+    public void UpdateJob(Job job)
+    {
+        _context.Jobs.Update(job);
+        _context.SaveChanges();
+    }
+
+    // DELETE (Soft Delete)
+    // Nota: O Service deve chamar job.SetAsDeleted() antes de invocar este método.
+    public void DeleteJob(Job job)  // ← Recebe entidade já marcada
+    {
+        _context.Jobs.Update(job);    // ← Persiste apenas IsDeleted = true
+        _context.SaveChanges();
+    }
+}
+```
+
+**Contrato Soft Delete entre Service e Repository:**
+
+1. **Service** chama `entity.SetAsDeleted()` antes de passar para Repository
+2. **Repository** recebe a entidade já com `IsDeleted = true` e persiste via `Update()`
+3. **Queries** usam filtro `!IsDeleted` para excluir deletados logicamente
+
+Se a etapa 1 for esquecida, o GET após DELETE retornará o registro (bug comum).
+
+---
+
 ## 📝 Exemplo Prático: Usar Repository
 
 ### Criando Empresa
@@ -384,12 +445,15 @@ public class CompanyRepository : ICompanyRepository
 
     public Company? GetCompanyById(int id)
     {
-        return _context.Company.FirstOrDefault(c => c.Id == id && !c.IsDeleted)!;
+        return _context.Company
+            .FirstOrDefault(c => c.Id == id && !c.IsDeleted);
     }
 
     public List<Company> GetAllCompanies()
     {
-        return _context.Company.ToList();
+        return _context.Company
+            .Where(c => !c.IsDeleted)
+            .ToList();
     }
 
     public void UpdateCompany(Company company)
@@ -398,14 +462,25 @@ public class CompanyRepository : ICompanyRepository
         _context.SaveChanges();
     }
 
-    public void DeleteCompany(Company company)
+    public void DeleteCompany(Company company)  // ← Recebe entidade já marcada
     {
         company.SetAsDeleted();
-        _context.Company.Update(company);
+        _context.Company.Update(company);      // ← Persiste IsDeleted = true
         _context.SaveChanges();
     }
 }
 ```
+
+**Contrato Soft Delete entre Service e Repository:**
+
+1. **Service** é responsável por chamar `entity.SetAsDeleted()` antes de passar a entidade para o Repository
+2. **Repository** recebe a entidade já com `IsDeleted = true` e persiste via `Update()` (NÃO usa `Remove()`)
+3. **Queries** (`GetById`, `GetAll`) sempre filtram `!IsDeleted` para excluir registros deletados logicamente
+
+Essa separação garante:
+- Service controla a lógica de quando algo é "deletado"
+- Repository apenas persiste o estado
+- Auditoria possível (IsDeleted + CreatedAt preservam histórico)
 
 **Observação importante:** no projeto atual, a exclusão é lógica. Consultas públicas como `GetCompanies()` e `GetCompanyById()` ignoram registros com `IsDeleted = true`, então a empresa continua persistida para auditoria e histórico.
 
@@ -419,6 +494,7 @@ public class CompanyRepository : ICompanyRepository
 4. ✅ **Sem Async (por enquanto)** - Simplicidade primeiro
 5. ✅ **Registrar em Module** - Centralizado em `InfrastructureModule.cs`
 6. ✅ **Testar com Mock** - Repository é testável
+7. ✅ **Soft Delete Contract** - Service chama `SetAsDeleted()`, Repository usa `Update()`
 
 ---
 

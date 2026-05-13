@@ -37,6 +37,7 @@ public static class InfrastructureModule
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IJobRepository, JobRepository>();
 
         return services;
     }

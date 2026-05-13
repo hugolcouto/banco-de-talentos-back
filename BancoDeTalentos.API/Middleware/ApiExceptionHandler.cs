@@ -25,12 +25,13 @@ public class ApiExceptionHandler : IExceptionHandler
                 Status = StatusCodes.Status500InternalServerError,
                 Title = exception.Message
             };
-        };
+        }
+        ;
 
         httpContext.Response.StatusCode = details.Status ?? StatusCodes.Status500InternalServerError;
 
         await httpContext.Response.WriteAsJsonAsync(details, cancellationToken);
-        
+
         return true;
     }
 }

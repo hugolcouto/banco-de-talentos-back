@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using BancoDeTalentos.API.Extensions;
+using System.Runtime.ConstrainedExecution;
 using BancoDeTalentos.Application.Model;
 using BancoDeTalentos.Tests.Factories;
 using Bogus;
@@ -20,18 +20,16 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
         _client = factory.CreateClient();
     }
 
-
     public async Task InitializeAsync()
     {
-        object newCompanyObject = new
-        {
-            name = _faker.Company.CompanyName(),
-            document = _faker.Company.Cnpj(),
-            telephone = _faker.Phone.PhoneNumber(),
-            email = _faker.Internet.Email(),
-            password = _faker.Random.Hash(),
-            about = _faker.Lorem.Paragraph(2),
-        };
+        object newCompanyObject = new CreateCompanyModel(
+            _faker.Company.CompanyName(),
+            _faker.Company.Cnpj(),
+            _faker.Phone.PhoneNumber(),
+            _faker.Internet.Email(),
+            _faker.Random.Hash(),
+            _faker.Lorem.Paragraph(2)
+        );
 
         HttpResponseMessage? getResponse = await _client
             .PostAsJsonAsync("/api/empresa", newCompanyObject);
@@ -50,6 +48,8 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
     [Fact]
     public async Task Job_Flow_Should_Work()
     {
+        Assert.NotNull(_companyId);
+
         object createJobObject = new
         {
             title = _faker.Name.JobTitle(),
@@ -59,11 +59,11 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
             optionalRequirements = _faker.Lorem.Paragraph(1),
             address = _faker.Address.FullAddress(),
             modality = _faker.Random.Word(),
-            salary = _faker.Random.Double(1000, 3000),
+            salary = _faker.Random.Decimal(1000, 3000),
             showSalary = _faker.Random.Bool(),
             dueDate = _faker.Date.Future(refDate: DateTime.Now),
             openedVacancies = _faker.Random.Int(1, 10),
-            companyId = _companyId,
+            companyId = (int)_companyId
         };
 
         object updateJobObject = new
@@ -75,14 +75,13 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
             optionalRequirements = _faker.Lorem.Paragraph(1),
             address = _faker.Address.FullAddress(),
             modality = _faker.Random.Word(),
-            salary = _faker.Random.Double(1000, 3000),
+            salary = _faker.Random.Decimal(1000, 3000),
             showSalary = _faker.Random.Bool(),
             dueDate = _faker.Date.Future(refDate: DateTime.Now),
             openedVacancies = _faker.Random.Int(1, 10),
-            companyId = _companyId,
+            companyId = (int)_companyId
         };
 
-        Assert.NotNull(_companyId);
         int jobId = await CreateJob(createJobObject);
         await GetJobById(jobId, createJobObject);
         await UpdateJob(jobId, updateJobObject, createJobObject);
@@ -99,7 +98,7 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
         // Step 2 - Create a new job
         HttpResponseMessage? getJobResponse = await _client.PostAsJsonAsync(_apiPath, newJobObject);
 
-        Assert.Equal(HttpStatusCode.OK, getJobResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, getJobResponse.StatusCode);
 
         ResultViewModel<JobViewModel?>? postResult = await getJobResponse
             .Content
@@ -107,7 +106,7 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
 
         Assert.NotNull(postResult!.Data);
 
-        return postResult!.Data!.Id;
+        return postResult.Data.Id;
     }
 
     /// <summary>
@@ -126,7 +125,8 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
             .Content
             .ReadFromJsonAsync<ResultViewModel<JobViewModel?>>();
 
-        Assert.Equal(newJobObject, getResult!.Data);
+        dynamic updatedData = newJobObject;
+        Assert.Equal(updatedData.title, getResult!.Data!.Title);
     }
 
     /// <summary>
@@ -152,21 +152,27 @@ public class JobControllerTests : IClassFixture<TestingWebApplicationFactory>, I
             .Content
             .ReadFromJsonAsync<ResultViewModel<JobViewModel?>>();
 
-        Assert.NotEqual(createJobObject, updateJobObject);
+        dynamic model = createJobObject;
+        dynamic updateModel = updateJobObject;
+        Assert.NotEqual(res?.Data?.Title, model.title);
+        Assert.Equal(res?.Data?.Title, updateModel.title);
     }
 
     /// <summary>
     /// Teste de deleção de vaga
     /// </summary>
+    /// <param name="jobId"></param>
     /// <returns></returns>
     private async Task DeleteJob(int jobId)
     {
-        HttpResponseMessage? deleteJob = await _client.DeleteAsync($"{_apiPath}/{jobId}");
+        HttpResponseMessage? res = await _client.DeleteAsync($"{_apiPath}/{jobId}");
 
-        Assert.Equal(HttpStatusCode.OK, deleteJob.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, res.StatusCode);
 
-        HttpResponseMessage? getDeletedJob = await _client.GetAsync($"{_apiPath}/{jobId}");
+        HttpResponseMessage? deletedRes = await _client.GetAsync($"{_apiPath}/{jobId}");
 
-        Assert.Equal(HttpStatusCode.NotFound, getDeletedJob.StatusCode);
+        Console.WriteLine($"{deletedRes}");
+
+        Assert.Equal(HttpStatusCode.NotFound, deletedRes.StatusCode);
     }
 }

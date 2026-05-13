@@ -475,6 +475,55 @@ public string? Password { get; private set; }
 
 ---
 
+### Problema 12: DELETE não remove o registro -- GET ainda retorna 200 OK após deletar
+
+**Causa:** O método `SetAsDeleted()` não foi chamado antes de `DeleteJob()`/`DeleteCompany()`, OU o Repository está usando `Remove()` (hard delete) em vez de `Update()` (soft delete). Esta é a causa raiz do bug encontrado em `JobControllerTests.Job_Flow_Should_Work` onde `deletedRes.StatusCode` retorna OK em vez de NotFound.
+
+**Diagnóstico:**
+
+1. Verificar se `entity.IsDeleted == true` após chamar `SetAsDeleted()`
+2. Verificar se o Repository usa `Update()` (não `Remove()`)
+3. Verificar se `GetJobById()` / `GetCompanyById()` filtra `!j.IsDeleted`
+
+**Solução:**
+
+```csharp
+// Service: SEMPRE chamar SetAsDeleted() ANTES do Delete
+public ResultViewModel DeleteJob(int id)
+{
+    Job? job = _jobRepository.GetJobById(id);
+    if (job is null)
+        return ResultViewModel.Error("Vaga não encontrada", HttpStatusCode.NotFound);
+
+    job.SetAsDeleted();                    // ← OBRIGATÓRIO
+    _jobRepository.DeleteJob(job);        // ← Repository persiste o flag
+    return ResultViewModel.Sucess();
+}
+
+// Repository: usar Update() (nunca Remove)
+public void DeleteJob(Job job)
+{
+    _context.Jobs.Update(job);            // ← Persiste IsDeleted = true
+    _context.SaveChanges();
+}
+
+// Query: filtrar !IsDeleted
+public Job? GetJobById(int id)
+{
+    return _context.Jobs
+        .SingleOrDefault(j => j.Id == id && !j.IsDeleted);
+}
+```
+
+**Efeito esperado após correção:**
+
+```
+1. DELETE /api/vaga/1  →  204 No Content
+2. GET    /api/vaga/1  →  404 Not Found (porque IsDeleted = true e filtro !IsDeleted)
+```
+
+---
+
 ## 📊 Verificação de Saúde (Health Check)
 
 Adicionar health check em `Program.cs`:

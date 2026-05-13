@@ -11,109 +11,118 @@ namespace BancoDeTalentos.Tests.Integrations;
 public class CompanyControllerTests : IClassFixture<TestingWebApplicationFactory>
 {
     private readonly HttpClient _client;
-    private int? _companyId;
+    private readonly string _apiPath = "/api/empresa";
+    private Faker _faker = new Faker("pt_BR");
 
-    public CompanyControllerTests(TestingWebApplicationFactory factory) : base()
+    public CompanyControllerTests(TestingWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
-        _companyId = null;
     }
 
-    public static IEnumerable<object[]> GetCompanyTestData()
+    [Fact]
+    public async Task Company_Flow_Should_Work()
     {
-        Faker faker = new Faker("pt_BR");
-
-        for (int i = 0; i < 2; i++)
+        object createModel = new
         {
-            yield return new object[]
-            {
-                // Dados de criação
-                new
-                {
-                    name = faker.Company.CompanyName(),
-                    document = faker.Company.Cnpj(),
-                    telephone = faker.Phone.PhoneNumber(),
-                    email = faker.Internet.Email(),
-                    password = faker.Random.Hash(),
-                    about = faker.Lorem.Paragraph(),
-                },
+            name = _faker.Company.CompanyName(),
+            document = _faker.Company.Cnpj(),
+            telephone = _faker.Phone.PhoneNumber(),
+            email = _faker.Internet.Email(),
+            password = _faker.Random.Hash(),
+            about = _faker.Lorem.Paragraph(),
+        };
 
-                // Dados de atualização
-                new
-                {
-                    name = faker.Company.CompanyName(),
-                    telephone = faker.Phone.PhoneNumber(),
-                    email = faker.Internet.Email(),
-                    about = faker.Lorem.Paragraph()
-                }
-            };
-        }
+        object updateModel = new
+        {
+            name = _faker.Company.CompanyName(),
+            telephone = _faker.Phone.PhoneNumber(),
+            email = _faker.Internet.Email(),
+            about = _faker.Lorem.Paragraph()
+        };
+
+        int companyId = await CreateCompany(createModel);
+        await CreateCompany(createModel);
+        await GetAllCompanies();
+        await GetCompanyById(companyId, createModel);
+        await UpdateCompany(companyId, updateModel, createModel);
+        await DeleteCompany(companyId);
     }
 
-    [Theory]
-    [MemberData(nameof(GetCompanyTestData))]
-    public async Task Company_Flow_Should_Work_Correctly(Object newCompanyPayload, Object updatePayload)
+    // Create
+    private async Task<int> CreateCompany(object createModel)
     {
-        // Etapa 1 - Criar empresas
-        HttpResponseMessage? postResponse = await _client
-            .PostAsJsonAsync("/api/empresa", newCompanyPayload);
+        HttpResponseMessage? res = await _client.PostAsJsonAsync(
+            _apiPath,
+            createModel
+        );
 
-        Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, res.StatusCode);
 
-        ResultViewModel<CompanyViewModel?>? postResult = await postResponse
+        ResultViewModel<CompanyViewModel?>? content = await res
             .Content
             .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
 
-        Assert.NotNull(postResult?.Data);
-        int companyId = postResult.Data.Id;
-        _companyId = postResult.Data.Id;
+        Assert.NotNull(content!.Data);
 
-        dynamic payload = newCompanyPayload;
-        Assert.Equal((string)payload.name, postResult.Data.Name);
-        Assert.True(companyId > 0);
+        return content.Data.Id!;
+    }
 
-        // Etapa 2 - Buscar empresa por ID
-        HttpResponseMessage? getResponse = await _client.GetAsync($"/api/empresa/{companyId}");
+    // Read
+    private async Task GetAllCompanies()
+    {
+        HttpResponseMessage? res = await _client.GetAsync(_apiPath);
 
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
 
-        ResultViewModel<CompanyViewModel?>? getResult = await getResponse
+        Assert.NotNull(res);
+    }
+
+    private async Task GetCompanyById(int companyId, object createModel)
+    {
+        HttpResponseMessage? res = await _client.GetAsync($"{_apiPath}/{companyId}");
+
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+
+        ResultViewModel<CompanyViewModel?>? content = await res
             .Content
             .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
 
-        Assert.NotNull(getResult?.Data);
-        Assert.Equal(companyId, getResult?.Data.Id);
-        Assert.Equal((string)payload.name, getResult?.Data.Name);
+        dynamic payload = createModel;
+        Assert.Equal((string)payload.name, content!.Data!.Name);
+    }
 
-        // Etapa 3 - Listar todas as empresas
-        HttpResponseMessage? listResponse = await _client.GetAsync("/api/empresa");
+    // Update
+    private async Task UpdateCompany(int companyId, object updateModel, object createModel)
+    {
+        HttpResponseMessage? res = await _client.PatchAsJsonAsync(
+            $"{_apiPath}/{companyId}", updateModel
+        );
 
-        Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
 
-        // Etapa 4 - Atualizar empresa
-        HttpResponseMessage updateResponse = await _client
-            .PatchAsJsonAsync($"/api/empresa/{companyId}", updatePayload);
+        HttpResponseMessage? updatedRes = await _client.GetAsync(
+            $"{_apiPath}/{companyId}"
+        );
 
-        Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
-
-        HttpResponseMessage? getUpdatedResponse = await _client.GetAsync($"/api/empresa/{companyId}");
-
-        Assert.Equal(HttpStatusCode.OK, getUpdatedResponse.StatusCode);
-
-        ResultViewModel<CompanyViewModel?>? getUpdateResult = await getUpdatedResponse
+        ResultViewModel<CompanyViewModel?>? content = await updatedRes
             .Content
             .ReadFromJsonAsync<ResultViewModel<CompanyViewModel?>>();
 
-        payload = updatePayload;
-        Assert.Equal((string)payload.name, getUpdateResult?.Data?.Name);
+        Assert.NotNull(content!.Data!);
 
-        // Etapa 5 - Deletar empresa
-        HttpResponseMessage? deleteResponse = await _client.DeleteAsync($"/api/empresa/{companyId}");
+        dynamic createModelPayload = createModel;
+        Assert.NotEqual(content.Data.Name, (string)createModelPayload.name);
+    }
 
-        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+    // Delete
+    private async Task DeleteCompany(int companyId)
+    {
+        HttpResponseMessage? res = await _client.DeleteAsync($"{_apiPath}/{companyId}");
 
-        HttpResponseMessage tryGetDeleted = await _client.GetAsync($"/api/empresa/{companyId}");
+        Assert.Equal(HttpStatusCode.NoContent, res.StatusCode);
 
-        Assert.Equal(HttpStatusCode.NotFound, tryGetDeleted.StatusCode);
+        HttpResponseMessage? deletedRes = await _client.GetAsync($"{_apiPath}/{companyId}");
+
+        Assert.Equal(HttpStatusCode.NotFound, deletedRes.StatusCode);
     }
 }

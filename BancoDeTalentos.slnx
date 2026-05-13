@@ -4,4 +4,8 @@
   <Project Path="BancoDeTalentos.Core/BancoDeTalentos.Core.csproj" />
   <Project Path="BancoDeTalentos.Infrastructure/BancoDeTalentos.Infrastructure.csproj" />
   <Project Path="BancoDeTalentos.Tests/BancoDeTalentos.Tests.csproj" />
+
+  <Configurations>
+    <StartupProject Name="BancoDeTalentos.API" /> 
+  </Configurations>
 </Solution>

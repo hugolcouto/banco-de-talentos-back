@@ -24,7 +24,7 @@ public class JobRepository : IJobRepository
     {
         Job? job = _context
             .Jobs
-            .SingleOrDefault(j => j.Id == id);
+            .SingleOrDefault(j => j.Id == id && !j.IsDeleted);
 
         return job;
     }
@@ -33,6 +33,7 @@ public class JobRepository : IJobRepository
     {
         List<Job>? jobs = _context
             .Jobs
+            .Where(j => !j.IsDeleted)
             .ToList();
 
         return jobs;

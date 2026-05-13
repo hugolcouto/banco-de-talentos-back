@@ -435,16 +435,19 @@ public class CompanyRepository : ICompanyRepository
         return company.Id;
     }
 
-    // READ by ID
+    // READ by ID (filtra apenas ativos)
     public Company? GetCompanyById(int id)
     {
-        return _context.Company.FirstOrDefault(c => c.Id == id);
+        return _context.Company
+            .FirstOrDefault(c => c.Id == id && !c.IsDeleted);
     }
 
-    // READ all
+    // READ all (apenas ativos)
     public List<Company> GetAllCompanies()
     {
-        return _context.Company.ToList();
+        return _context.Company
+            .Where(c => !c.IsDeleted)
+            .ToList();
     }
 
     // UPDATE
@@ -454,15 +457,12 @@ public class CompanyRepository : ICompanyRepository
         _context.SaveChanges();
     }
 
-    // DELETE
-    public void DeleteCompany(int id)
+    // DELETE (Soft Delete)
+    // Nota: O Service deve chamar company.SetAsDeleted() antes de invocar este método.
+    public void DeleteCompany(Company company)  // ← Recebe entidade já marcada
     {
-        var company = _context.Company.Find(id);
-        if (company != null)
-        {
-            _context.Company.Remove(company);
-            _context.SaveChanges();
-        }
+        _context.Company.Update(company);      // ← Persiste apenas IsDeleted = true
+        _context.SaveChanges();
     }
 }
 ```

@@ -6,7 +6,7 @@ namespace BancoDeTalentos.Application.Interfaces;
 public interface IJobService
 {
     // Create
-    ResultViewModel<JobViewModel> CreateJob(JobViewModel model);
+    ResultViewModel<JobViewModel> CreateJob(CreateJobModel model);
 
     // Read
     ResultViewModel<List<JobViewModel>> GetJobs();
