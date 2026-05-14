@@ -10,10 +10,12 @@ namespace BancoDeTalentos.API.Controllers;
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companyService;
+    private readonly IJobService _jobService;
 
-    public CompaniesController(ICompanyService companyService)
+    public CompaniesController(ICompanyService companyService, IJobService jobService)
     {
         _companyService = companyService;
+        _jobService = jobService;
     }
 
     // create
@@ -44,6 +46,13 @@ public class CompaniesController : ControllerBase
         ResultViewModel<CompanyViewModel> company = _companyService.GetCompanyById(id);
 
         return company.ToActionResult(this);
+    }
+
+    [HttpGet("{id}/vagas")]
+    public IActionResult GetJobsByCompany(int id)
+    {
+        ResultViewModel<List<JobViewModel>>? result = _jobService.GetJobsByCompanyId(id);
+        return result.ToActionResult(this);
     }
 
     // update

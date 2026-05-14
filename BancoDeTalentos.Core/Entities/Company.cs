@@ -19,7 +19,7 @@ public class Company : BaseEntity
         Email = email;
         Password = password;
         About = about;
-        // Jobs = new List<Job>();
+        Jobs = new List<Job>();
     }
 
     public string Name { get; private set; }
@@ -28,7 +28,7 @@ public class Company : BaseEntity
     public string Email { get; private set; }
     public string Password { get; private set; }
     public string About { get; private set; }
-    // public List<Job> Jobs { get; private set; } = new List<Job>();
+    public List<Job> Jobs { get; private set; } = new List<Job>();
 
     public void Update(string name, string telephone, string email, string about)
     {

@@ -27,9 +27,12 @@ public class BancoDeTalentosDbContext : DbContext
             e => e.HasKey(c => c.Id)
         );
 
-        modelBuilder.Entity<Job>(
-            e => e.HasKey(j => j.Id)
-        );
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Company)
+            .WithMany(c => c.Jobs)
+            .HasForeignKey(j => j.CompanyId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         base.OnModelCreating(modelBuilder);
     }

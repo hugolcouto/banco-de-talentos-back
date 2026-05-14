@@ -1,4 +1,3 @@
-using System;
 using BancoDeTalentos.Core.Entities;
 
 namespace BancoDeTalentos.Core.Interfaces;
@@ -11,6 +10,7 @@ public interface IJobRepository
     // Read
     List<Job>? GetJobs();
     Job? GetJobById(int id);
+    List<Job>? GetJobsByCompanyid(int companyId);
 
     // Update
     void UpdateJob(Job job);

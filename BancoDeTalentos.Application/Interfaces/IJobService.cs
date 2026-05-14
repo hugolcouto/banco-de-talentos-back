@@ -11,6 +11,7 @@ public interface IJobService
     // Read
     ResultViewModel<List<JobViewModel>> GetJobs();
     ResultViewModel<JobViewModel> GetJobById(int id);
+    ResultViewModel<List<JobViewModel>> GetJobsByCompanyId(int companyId);
 
     // Update
     // TODO: Alterar o model para UpdateJobModel

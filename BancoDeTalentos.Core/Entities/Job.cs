@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BancoDeTalentos.Core.Entities;
 
 public class Job : BaseEntity
@@ -44,6 +46,8 @@ public class Job : BaseEntity
     public DateTime DueDate { get; private set; }
     public int OpenedVacancies { get; private set; }
     public int CompanyId { get; private set; }
+    [JsonIgnore]
+    public Company Company { get; set; }
 
     public void Update(
         string title,

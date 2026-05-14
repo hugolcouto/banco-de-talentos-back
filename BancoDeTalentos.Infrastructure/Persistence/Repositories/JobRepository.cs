@@ -22,21 +22,17 @@ public class JobRepository : IJobRepository
     // Read
     public Job? GetJobById(int id)
     {
-        Job? job = _context
+        return _context
             .Jobs
             .SingleOrDefault(j => j.Id == id && !j.IsDeleted);
-
-        return job;
     }
 
     public List<Job>? GetJobs()
     {
-        List<Job>? jobs = _context
+        return _context
             .Jobs
             .Where(j => !j.IsDeleted)
             .ToList();
-
-        return jobs;
     }
 
     // Update
@@ -51,5 +47,12 @@ public class JobRepository : IJobRepository
     {
         _context.Jobs.Update(job);
         _context.SaveChanges();
+    }
+
+    public List<Job>? GetJobsByCompanyid(int companyId)
+    {
+        return _context.Jobs
+            .Where(j => j.CompanyId == companyId)
+            .ToList();
     }
 }

@@ -123,5 +123,18 @@ public class JobService : IJobService
         return ResultViewModel.Sucess();
     }
 
+    public ResultViewModel<List<JobViewModel>> GetJobsByCompanyId(int companyId)
+    {
+        // Correção: nome do método e mapeamento
+        List<Job>? jobs = _jobRepository.GetJobsByCompanyid(companyId);
 
+        if (jobs == null || !jobs.Any())
+            return ResultViewModel<List<JobViewModel>>.Success(new List<JobViewModel>());
+
+        List<JobViewModel> viewModels = jobs
+            .Select(JobViewModel.FromEntity)
+            .ToList()!;
+
+        return ResultViewModel<List<JobViewModel>>.Success(viewModels);
+    }
 }

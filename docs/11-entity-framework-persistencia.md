@@ -469,13 +469,185 @@ public class CompanyRepository : ICompanyRepository
 
 ---
 
+## 🔗 Relacionamentos entre Entidades
+
+Entity Framework Core permite definir relacionamentos entre entidades. O mais comum é o relacionamento **1-N** (um para muitos).
+
+### Relacionamento 1-N: Company → Job
+
+No projeto, uma `Company` pode ter várias `Jobs`, mas cada `Job` pertence a apenas uma `Company`.
+
+#### Passo 1: Adicionar propriedade de navegação na Entidade Filha
+
+```csharp
+// Arquivo: BancoDeTalentos.Core/Entities/Job.cs
+namespace BancoDeTalentos.Core.Entities;
+
+public class Job : BaseEntity
+{
+    // ... outras propriedades ...
+
+    public int CompanyId { get; private set; }  // Chave estrangeira
+
+    // Propriedade de navegação - aponta para a entidade pai
+    public Company Company { get; private set; } = null!;
+}
+```
+
+#### Passo 2: Adicionar coleção na Entidade Pai
+
+```csharp
+// Arquivo: BancoDeTalentos.Core/Entities/Company.cs
+namespace BancoDeTalentos.Core.Entities;
+
+public class Company : BaseEntity
+{
+    // ... outras propriedades ...
+
+    // Coleção de Jobs - inicializada no construtor
+    public List<Job> Jobs { get; private set; } = new List<Job>();
+
+    public Company(
+        string name,
+        string document,
+        string telephone,
+        string email,
+        string password,
+        string about
+    ) : base()
+    {
+        // ... outras atribuições ...
+        Jobs = new List<Job>();  // Inicializa a coleção
+    }
+}
+```
+
+#### Passo 3: Configurar o relacionamento no DbContext
+
+```csharp
+// Arquivo: BancoDeTalentos.Infrastructure/Persistence/BancoDeTalentosDbContext.cs
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Configurar chave primária para Company
+    modelBuilder.Entity<Company>(e => e.HasKey(c => c.Id));
+
+    // Configurar chave primária para Job
+    modelBuilder.Entity<Job>(e => e.HasKey(j => j.Id));
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Relacionamento 1-N: Company → Job
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    modelBuilder.Entity<Job>()
+        .HasOne(j => j.Company)        // Um Job tem uma Company
+        .WithMany(c => c.Jobs)         // Uma Company tem muitos Jobs
+        .HasForeignKey(j => j.CompanyId)  // Chave estrangeira em Job
+        .IsRequired();                 // CompanyId é obrigatório
+
+    base.OnModelCreating(modelBuilder);
+}
+```
+
+### Como usar o relacionamento
+
+#### Criar um Job com Company associado
+
+```csharp
+// Criar Company primeiro
+Company company = new Company(
+    "Acme Corp",
+    "123.456.789-00",
+    "(11) 99999-9999",
+    "contact@acme.com",
+    "password123",
+    "About us"
+);
+_context.Company.Add(company);
+_context.SaveChanges();  // Gera o ID
+
+// Criar Job associado à Company
+Job job = new Job(
+    "Desenvolvedor Senior",
+    "Descrição da vaga",
+    "Benefícios",
+    "Requisitos",
+    "Diferenciais",
+    "Endereço",
+    "Remoto",
+    8000m,
+    DateTime.Now.AddDays(30),
+    2,
+    company.Id  // Passa o CompanyId
+);
+_context.Jobs.Add(job);
+_context.SaveChanges();
+```
+
+#### Carregar dados relacionados (Include)
+
+```csharp
+// Carrega Company com todas as Jobs
+Company company = _context.Company
+    .Include(c => c.Jobs)  // Inclui os Jobs relacionados
+    .FirstOrDefault(c => c.Id == 1);
+
+// Agora company.Jobs está populado
+foreach (Job job in company.Jobs)
+{
+    Console.WriteLine($"Vaga: {job.Title}");
+}
+```
+
+#### Filtrar por relacionamento
+
+```csharp
+// Obter todas as Jobs de uma Company
+List<Job> jobs = _context.Jobs
+    .Where(j => j.CompanyId == 1)
+    .ToList();
+
+// Obter Company com Jobs usando LINQ
+var result = _context.Company
+    .Where(c => c.Id == 1)
+    .Select(c => new {
+        Company = c,
+        Jobs = c.Jobs.ToList()
+    })
+    .FirstOrDefault();
+```
+
+### Resumo do Relacionamento
+
+| Entidade | Propriedade | Tipo | Descrição |
+|----------|-------------|------|-----------|
+| Company | `Jobs` | `List<Job>` | Coleção de Jobs (navegação) |
+| Job | `CompanyId` | `int` | Chave estrangeira |
+| Job | `Company` | `Company` | Propriedade de navegação |
+
+### Comandos úteis
+
+```csharp
+// Executar migrations para aplicar mudanças no banco
+dotnet ef migrations add AdicionarRelacionamentoCompanyJob
+dotnet ef database update
+```
+
+---
+
 ## ⚠️ Boas Práticas
 
-1. ✅ **Usar DbContext via DI** - Nunca criar manualmente
-2. ✅ **Usar Repositories** - Abstrair EF do Service
-3. ✅ **SaveChanges() no Repository** - Não no Service
-4. ✅ **Async/await** - Em produção (futuro)
-5. ✅ **Migrations** - Versonar schema do BD
+1. ✅ **Sempre inicializar coleções** - `new List<Job>()` no construtor ou inicialização
+2. ✅ **Usar Include() quando precisar** - Carrega dados relacionados eficientemente
+3. ✅ **Configurar relacionamento no OnModelCreating** - Deixa explícito o schema
+4. ✅ **Usar propriedade de navegação** - Não apenas chave estrangeira solta
+5. ✅ **Considerar lazy loading** - Apenas se necessário e bem configurado
+
+---
+
+**Referências de Arquivo:**
+
+- `BancoDeTalentos.Core/Entities/Company.cs`
+- `BancoDeTalentos.Core/Entities/Job.cs`
+- `BancoDeTalentos.Infrastructure/Persistence/BancoDeTalentosDbContext.cs`
 
 ---
 
